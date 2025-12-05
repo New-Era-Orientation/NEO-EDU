@@ -84,22 +84,98 @@ cd frontend && npm run dev
 | Redis | 64 MB |
 | Node.js Apps | 384 MB |
 
+### ⚠️ Important Notes
+
+> **🚨 DO NOT copy `node_modules` from Windows to Linux!**
+> 
+> Packages with native bindings (like `bcrypt`, `sharp`, `sqlite3`) will fail with "invalid ELF header" errors. Always run `npm install` directly on the Linux server.
+
 ### Deploy to Debian Server
 
+#### Step 1: Run Setup Script (as root)
 \`\`\`bash
-# Run setup script (as root)
 sudo bash setup.sh
+\`\`\`
 
-# Copy application files
-scp -r frontend backend user@server:/opt/neoedu/
+This script will:
+- Configure 1GB swap space
+- Install Node.js 20, PostgreSQL 15, Redis
+- Create `neoedu` system user
+- Configure Nginx reverse proxy
+- Setup PM2 for process management
 
-# Build and start
-ssh user@server << 'EOF'
-  cd /opt/neoedu/frontend && npm install && npm run build
-  cd /opt/neoedu/backend && npm install && npm run build
-  pm2 start ecosystem.config.js
-  pm2 save
-EOF
+#### Step 2: Copy Source Code (without node_modules)
+\`\`\`bash
+# From your local machine
+rsync -avz --exclude 'node_modules' --exclude '.next' --exclude 'dist' frontend/ user@server:/opt/neoedu/frontend/
+rsync -avz --exclude 'node_modules' --exclude 'dist' backend/ user@server:/opt/neoedu/backend/
+\`\`\`
+
+#### Step 3: Build on Server
+\`\`\`bash
+# Frontend
+cd /opt/neoedu/frontend
+sudo -u neoedu npm install
+sudo -u neoedu npm run build
+
+# Backend
+cd /opt/neoedu/backend
+sudo -u neoedu npm install
+sudo -u neoedu npm run build
+\`\`\`
+
+#### Step 4: Configure Environment
+\`\`\`bash
+# Copy and edit backend .env
+sudo -u neoedu cp /opt/neoedu/backend/.env.example /opt/neoedu/backend/.env
+sudo -u neoedu nano /opt/neoedu/backend/.env
+
+# ⚠️ Change these values:
+# - DATABASE_URL password
+# - JWT_SECRET (use a random string)
+# - REDIS_URL (if different)
+\`\`\`
+
+#### Step 5: Start Services
+\`\`\`bash
+# Start with PM2
+sudo -u neoedu pm2 start /opt/neoedu/ecosystem.config.js
+
+# Save PM2 config (auto-restart on reboot)
+sudo -u neoedu pm2 save
+
+# Check status
+sudo -u neoedu pm2 status
+sudo -u neoedu pm2 logs
+\`\`\`
+
+### Access Points
+| Service | URL |
+|---------|-----|
+| Frontend | http://your-server-ip (via Nginx) |
+| Frontend Direct | http://your-server-ip:3000 |
+| Backend API | http://your-server-ip/api |
+| Backend Direct | http://your-server-ip:4000 |
+
+### Troubleshooting
+
+**bcrypt "invalid ELF header" error:**
+\`\`\`bash
+cd /opt/neoedu/backend
+sudo -u neoedu npm rebuild bcrypt
+# or
+sudo -u neoedu rm -rf node_modules && sudo -u neoedu npm install
+\`\`\`
+
+**PostgreSQL GPG key error (Debian 12+):**
+The setup script uses the modern `signed-by` approach instead of deprecated `apt-key`.
+
+**Check service status:**
+\`\`\`bash
+sudo -u neoedu pm2 status        # PM2 apps
+sudo systemctl status nginx      # Nginx
+sudo systemctl status postgresql # PostgreSQL
+sudo systemctl status redis      # Redis
 \`\`\`
 
 ## 📄 License

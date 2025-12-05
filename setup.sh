@@ -155,7 +155,14 @@ install_postgresql() {
     echo -e "${YELLOW}[5/8] Installing PostgreSQL ${POSTGRES_VERSION}...${NC}"
     
     # Add PostgreSQL repository (modern approach without deprecated apt-key)
-    wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /usr/share/keyrings/postgresql-keyring.gpg
+    # Remove any existing keyring to avoid conflicts
+    rm -f /usr/share/keyrings/postgresql-keyring.gpg
+    
+    # Download and install the PostgreSQL signing key
+    curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /usr/share/keyrings/postgresql-keyring.gpg
+    chmod 644 /usr/share/keyrings/postgresql-keyring.gpg
+    
+    # Add the repository with signed-by reference
     echo "deb [signed-by=/usr/share/keyrings/postgresql-keyring.gpg] http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list
     apt-get update -qq
     apt-get install -y -qq postgresql-${POSTGRES_VERSION}
@@ -222,6 +229,9 @@ install_redis() {
     
     apt-get install -y -qq redis-server
     
+    # Create config directory FIRST (before writing files)
+    mkdir -p /etc/redis/redis.conf.d
+    
     # Create memory-optimized configuration
     cat > /etc/redis/redis.conf.d/memory.conf << 'EOF'
 #===============================================================================
@@ -240,11 +250,6 @@ appendonly no
 # Connection settings
 maxclients 50
 timeout 300
-
-# Disable dangerous commands
-rename-command FLUSHDB ""
-rename-command FLUSHALL ""
-rename-command DEBUG ""
 EOF
 
     # Include custom config in main config
@@ -252,12 +257,9 @@ EOF
         echo "include /etc/redis/redis.conf.d/*.conf" >> /etc/redis/redis.conf
     fi
     
-    # Create config directory
-    mkdir -p /etc/redis/redis.conf.d
-    
-    # Apply memory settings directly to main config
-    sed -i 's/^maxmemory .*/maxmemory 64mb/' /etc/redis/redis.conf
-    sed -i 's/^# maxmemory .*/maxmemory 64mb/' /etc/redis/redis.conf
+    # Apply memory settings directly to main config (as fallback)
+    sed -i 's/^maxmemory .*/maxmemory 64mb/' /etc/redis/redis.conf 2>/dev/null || true
+    sed -i 's/^# maxmemory .*/maxmemory 64mb/' /etc/redis/redis.conf 2>/dev/null || true
     
     systemctl restart redis-server
     systemctl enable redis-server
