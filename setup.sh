@@ -154,9 +154,9 @@ install_nodejs() {
 install_postgresql() {
     echo -e "${YELLOW}[5/8] Installing PostgreSQL ${POSTGRES_VERSION}...${NC}"
     
-    # Add PostgreSQL repository
-    sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
-    wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+    # Add PostgreSQL repository (modern approach without deprecated apt-key)
+    wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /usr/share/keyrings/postgresql-keyring.gpg
+    echo "deb [signed-by=/usr/share/keyrings/postgresql-keyring.gpg] http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list
     apt-get update -qq
     apt-get install -y -qq postgresql-${POSTGRES_VERSION}
     
