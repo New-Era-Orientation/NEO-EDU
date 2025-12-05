@@ -54,6 +54,75 @@ usersRouter.put("/profile", authenticate, async (req: Request, res: Response, ne
 });
 
 // ============================================
+// Get User Preferences
+// ============================================
+usersRouter.get("/preferences", authenticate, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = (req as Request & { userId: string }).userId;
+
+        const result = await query(
+            `SELECT preferences FROM users WHERE id = $1`,
+            [userId]
+        );
+
+        if (result.rows.length === 0) {
+            res.status(404).json({ error: "User not found" });
+            return;
+        }
+
+        const preferences = (result.rows[0] as { preferences: Record<string, unknown> }).preferences || {
+            language: "vi",
+            theme: "system",
+            notifications: true
+        };
+
+        res.json({ preferences });
+    } catch (error) {
+        next(error);
+    }
+});
+
+// ============================================
+// Update User Preferences
+// ============================================
+usersRouter.put("/preferences", authenticate, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = (req as Request & { userId: string }).userId;
+        const { language, theme, notifications } = req.body;
+
+        // Build update object with only provided fields
+        const updates: Record<string, unknown> = {};
+        if (language !== undefined) updates.language = language;
+        if (theme !== undefined) updates.theme = theme;
+        if (notifications !== undefined) updates.notifications = notifications;
+
+        if (Object.keys(updates).length === 0) {
+            res.status(400).json({ error: "No preferences to update" });
+            return;
+        }
+
+        // Use jsonb_set for partial updates
+        const result = await query(
+            `UPDATE users 
+       SET preferences = COALESCE(preferences, '{}')::jsonb || $1::jsonb,
+           updated_at = NOW()
+       WHERE id = $2
+       RETURNING preferences`,
+            [JSON.stringify(updates), userId]
+        );
+
+        if (result.rows.length === 0) {
+            res.status(404).json({ error: "User not found" });
+            return;
+        }
+
+        res.json({ preferences: (result.rows[0] as { preferences: Record<string, unknown> }).preferences });
+    } catch (error) {
+        next(error);
+    }
+});
+
+// ============================================
 // Get User's Enrolled Courses
 // ============================================
 usersRouter.get("/courses", authenticate, async (req: Request, res: Response, next: NextFunction) => {
@@ -76,11 +145,11 @@ usersRouter.get("/courses", authenticate, async (req: Request, res: Response, ne
             [userId]
         );
 
-        const courses = result.rows.map((row) => ({
-            ...(row as Record<string, unknown>),
+        const courses = result.rows.map((row: Record<string, unknown>) => ({
+            ...row,
             progress: Math.round(
-                (((row as Record<string, unknown>).completed_lessons as number) /
-                    ((row as Record<string, unknown>).total_lessons as number || 1)) * 100
+                ((row.completed_lessons as number) /
+                    ((row.total_lessons as number) || 1)) * 100
             ),
         }));
 

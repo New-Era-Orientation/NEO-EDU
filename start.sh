@@ -122,6 +122,15 @@ case "${1:-all}" in
         (cd "$SCRIPT_DIR/backend" && npm install)
         echo -e "${GREEN}✅ All dependencies installed!${NC}"
         ;;
+    migrate)
+        echo -e "${BLUE}📊 Running database migrations...${NC}"
+        if [ -f "$SCRIPT_DIR/migrate.sh" ]; then
+            bash "$SCRIPT_DIR/migrate.sh"
+        else
+            echo -e "${RED}Error: migrate.sh not found${NC}"
+            exit 1
+        fi
+        ;;
     *)
         echo "Usage: ./start.sh [command]"
         echo ""
@@ -131,5 +140,6 @@ case "${1:-all}" in
         echo "  backend   Start backend only"
         echo "  build     Build both projects"
         echo "  install   Install all dependencies"
+        echo "  migrate   Run database migrations"
         ;;
 esac

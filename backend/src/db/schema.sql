@@ -19,6 +19,7 @@ CREATE TABLE users (
     role VARCHAR(20) NOT NULL DEFAULT 'student' CHECK (role IN ('student', 'instructor', 'admin')),
     avatar TEXT,
     bio TEXT,
+    preferences JSONB DEFAULT '{"language": "vi", "theme": "system", "notifications": true}',
     last_login_at TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()

@@ -52,26 +52,86 @@ interface UIState {
     sidebarOpen: boolean;
     sidebarCollapsed: boolean;
     theme: "light" | "dark" | "system";
+    notifications: boolean;
+    isSyncing: boolean;
     toggleSidebar: () => void;
     setSidebarOpen: (open: boolean) => void;
     toggleSidebarCollapse: () => void;
-    setTheme: (theme: "light" | "dark" | "system") => void;
+    setTheme: (theme: "light" | "dark" | "system", sync?: boolean) => void;
+    setNotifications: (notifications: boolean, sync?: boolean) => void;
+    loadFromServer: () => Promise<void>;
+    syncToServer: (preferences: { theme?: "light" | "dark" | "system"; notifications?: boolean }) => Promise<void>;
 }
+
+// Lazy import to avoid circular dependency
+const getApi = () => import("@/lib/api").then(m => m.api);
+const getAuthStore = () => import("@/stores").then(m => m.useAuthStore);
 
 export const useUIStore = create<UIState>()(
     persist(
-        (set) => ({
+        (set, get) => ({
             sidebarOpen: false,
             sidebarCollapsed: false,
             theme: "system",
+            notifications: true,
+            isSyncing: false,
             toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
             setSidebarOpen: (open) => set({ sidebarOpen: open }),
             toggleSidebarCollapse: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
-            setTheme: (theme) => set({ theme }),
+            setTheme: async (theme, sync = true) => {
+                set({ theme });
+                if (sync) {
+                    const authStore = await getAuthStore();
+                    if (authStore.getState().isAuthenticated) {
+                        get().syncToServer({ theme });
+                    }
+                }
+            },
+            setNotifications: async (notifications, sync = true) => {
+                set({ notifications });
+                if (sync) {
+                    const authStore = await getAuthStore();
+                    if (authStore.getState().isAuthenticated) {
+                        get().syncToServer({ notifications });
+                    }
+                }
+            },
+            loadFromServer: async () => {
+                try {
+                    set({ isSyncing: true });
+                    const api = await getApi();
+                    const { preferences } = await api.getPreferences();
+                    set({
+                        theme: preferences.theme || "system",
+                        notifications: preferences.notifications ?? true,
+                        isSyncing: false
+                    });
+                } catch (error) {
+                    console.error("Failed to load preferences from server:", error);
+                    set({ isSyncing: false });
+                }
+            },
+            syncToServer: async (preferences) => {
+                try {
+                    set({ isSyncing: true });
+                    const api = await getApi();
+                    await api.updatePreferences(preferences);
+                    set({ isSyncing: false });
+                } catch (error) {
+                    console.error("Failed to sync preferences to server:", error);
+                    set({ isSyncing: false });
+                }
+            },
         }),
         {
             name: "neo-edu-ui",
             storage: createJSONStorage(() => localStorage),
+            partialize: (state) => ({
+                sidebarOpen: state.sidebarOpen,
+                sidebarCollapsed: state.sidebarCollapsed,
+                theme: state.theme,
+                notifications: state.notifications,
+            }),
         }
     )
 );

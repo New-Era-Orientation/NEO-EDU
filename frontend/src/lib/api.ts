@@ -63,6 +63,12 @@ export interface Lesson {
     updated_at: string;
 }
 
+export interface UserPreferences {
+    language: "vi" | "en";
+    theme: "light" | "dark" | "system";
+    notifications: boolean;
+}
+
 // ============================================
 // CSRF Token Management
 // ============================================
@@ -400,6 +406,17 @@ class ApiClient {
 
     async getEnrolledCourses(): Promise<{ courses: Course[] }> {
         return this.request<{ courses: Course[] }>("/users/courses");
+    }
+
+    async getPreferences(): Promise<{ preferences: UserPreferences }> {
+        return this.request<{ preferences: UserPreferences }>("/users/preferences");
+    }
+
+    async updatePreferences(data: Partial<UserPreferences>): Promise<{ preferences: UserPreferences }> {
+        return this.request<{ preferences: UserPreferences }>("/users/preferences", {
+            method: "PUT",
+            body: JSON.stringify(data),
+        });
     }
 
     // ============================================

@@ -22,6 +22,8 @@ export function useAuth() {
                     if (result.csrfToken) {
                         setCSRFToken(result.csrfToken);
                     }
+                    // Load preferences from server on auth restore
+                    loadPreferencesFromServer();
                 } else {
                     logout();
                 }
@@ -38,12 +40,14 @@ export function useAuth() {
 
     const loginMutation = useMutation({
         mutationFn: (data: { email: string; password: string }) => api.login(data),
-        onSuccess: (data) => {
+        onSuccess: async (data) => {
             login(data.user, data.token);
             if (data.csrfToken) {
                 setCSRFToken(data.csrfToken);
             }
             queryClient.invalidateQueries({ queryKey: ["user"] });
+            // Load preferences from server after login
+            await loadPreferencesFromServer();
         },
     });
 
@@ -54,12 +58,14 @@ export function useAuth() {
             name: string;
             role?: "student" | "instructor";
         }) => api.register(data),
-        onSuccess: (data) => {
+        onSuccess: async (data) => {
             login(data.user, data.token);
             if (data.csrfToken) {
                 setCSRFToken(data.csrfToken);
             }
             queryClient.invalidateQueries({ queryKey: ["user"] });
+            // Load preferences from server after register
+            await loadPreferencesFromServer();
         },
     });
 
@@ -117,6 +123,33 @@ export function useAuth() {
         isLoggingIn: loginMutation.isPending,
         isRegistering: registerMutation.isPending,
     };
+}
+
+// ============================================
+// Preferences Sync Helper
+// ============================================
+async function loadPreferencesFromServer() {
+    try {
+        // Dynamically import to avoid circular dependencies
+        const { useUIStore } = await import("@/stores");
+        const { useI18n } = await import("@/lib/i18n");
+
+        // Load UI preferences (theme, notifications)
+        useUIStore.getState().loadFromServer();
+
+        // Load language preference
+        const { preferences } = await api.getPreferences();
+        if (preferences.language) {
+            const i18nContext = document.querySelector('[data-i18n-context]');
+            if (i18nContext) {
+                // This will be handled by the I18n provider's loadFromServer
+            }
+            // Store in localStorage for I18n provider to pick up
+            localStorage.setItem("neo-edu-locale", preferences.language);
+        }
+    } catch (error) {
+        console.error("Failed to load preferences from server:", error);
+    }
 }
 
 // ============================================

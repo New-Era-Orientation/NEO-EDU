@@ -1,187 +1,183 @@
-# NEO EDU - Zero Cost Learning Management System
+# NEO EDU - Learning Management System
 
-A self-hosted, offline-first LMS optimized for minimal resources (1GB RAM).
+<div align="center">
+  <img src="assets/logo.png" alt="NEO EDU Logo" width="120" />
+  
+  **Nền tảng học trực tuyến | Hỗ trợ Offline | Miễn phí**
 
-## 🚀 Features
+  [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+  [![Node.js](https://img.shields.io/badge/Node.js-20+-green.svg)](https://nodejs.org)
+  [![Next.js](https://img.shields.io/badge/Next.js-15-black.svg)](https://nextjs.org)
+</div>
 
-- **Offline-First PWA** - Works without internet, syncs when online
-- **Resource Optimized** - Runs on 1 Core CPU, 1GB RAM
-- **No Docker Required** - Bare metal deployment with PM2
-- **Rich Content** - TipTap editor, PDF viewer, code playground
-- **Real-time** - WebSocket collaboration with Socket.IO
-- **Free Forever** - Zero software licensing costs
+---
+
+## 🚀 Tính năng
+
+### Cho học viên
+- 📚 **Duyệt & Đăng ký** - Khám phá khóa học theo danh mục
+- 💾 **Học Offline** - Hoạt động không cần internet
+- 📊 **Theo dõi tiến độ** - Xem hành trình học tập
+- 🌐 **Đa ngôn ngữ** - Tiếng Việt & English
+- ⚙️ **Đồng bộ Settings** - Cài đặt lưu theo tài khoản
+
+### Cho giảng viên
+- ✏️ **Tạo khóa học** - Quản lý nội dung dễ dàng
+- 📹 **Video & Bài viết** - Nhiều loại nội dung
+- 👥 **Quản lý học viên** - Xem danh sách đăng ký
+
+### Bảo mật
+- 🔒 **Cookie HTTP-only** - Bảo vệ token khỏi XSS
+- 🛡️ **CSRF Protection** - Token xác thực
+- 👮 **Phân quyền** - Student / Instructor / Admin
+
+---
 
 ## 📦 Tech Stack
 
-### Frontend
-- Next.js 14 (SSR/SSG)
-- Tailwind CSS + HeadlessUI
-- React Query + Zustand
-- Dexie (IndexedDB)
-- PWA with Service Workers
+| Frontend | Backend |
+|----------|---------|
+| Next.js 15 | Express.js |
+| React 19 | PostgreSQL |
+| Tailwind CSS | Redis |
+| React Query | Socket.IO |
+| Zustand | JWT + Cookies |
 
-### Backend
-- Express.js (lightweight)
-- PostgreSQL with Full-Text Search
-- Redis (64MB limit)
-- Socket.IO
-- JWT Authentication
+---
 
-## 🏗️ Project Structure
+## 🛠️ Cài đặt nhanh
 
-\`\`\`
-NEO-EDU/
-├── frontend/          # Next.js PWA
-├── backend/           # Express API
-├── setup.sh           # Debian deployment script
-├── ecosystem.config.js # PM2 configuration
-└── assets/            # Brand assets
-\`\`\`
-
-## 🛠️ Development
-
-### Prerequisites
+### Yêu cầu
 - Node.js 20+
 - PostgreSQL 15+
 - Redis
 
-### Local Setup
+### Cách 1: Dùng Script (Khuyến nghị)
 
-1. **Install dependencies**
-\`\`\`bash
-# Frontend
-cd frontend && npm install
+```bash
+# Cấp quyền
+chmod +x start.sh
 
-# Backend
-cd backend && npm install
-\`\`\`
+# Cài dependencies & chạy
+./start.sh install
+./start.sh
 
-2. **Setup database**
-\`\`\`bash
-# Create database
+# Hoặc chạy riêng
+./start.sh frontend  # Chỉ frontend
+./start.sh backend   # Chỉ backend
+./start.sh build     # Build production
+```
+
+### Cách 2: Thủ công
+
+```bash
+# 1. Cài dependencies
+cd frontend && npm install && cd ..
+cd backend && npm install && cd ..
+
+# 2. Tạo database
 psql -U postgres -c "CREATE DATABASE neoedu_dev;"
-
-# Run migrations
 psql -U postgres -d neoedu_dev -f backend/src/db/schema.sql
-\`\`\`
 
-3. **Start development servers**
-\`\`\`bash
-# Backend (port 4000)
-cd backend && npm run dev
+# 3. Cấu hình môi trường
+cp backend/.env.example backend/.env
 
-# Frontend (port 3000)
+# 4. Chạy
+cd backend && npm run dev &
 cd frontend && npm run dev
-\`\`\`
+```
 
-## 🚀 Production Deployment (1GB RAM Server)
+### URLs
 
-### Memory Allocation
-| Component | Memory |
-|-----------|--------|
-| OS + Buffer | 150 MB |
-| PostgreSQL | 256 MB |
-| Redis | 64 MB |
-| Node.js Apps | 384 MB |
-
-### ⚠️ Important Notes
-
-> **🚨 DO NOT copy `node_modules` from Windows to Linux!**
-> 
-> Packages with native bindings (like `bcrypt`, `sharp`, `sqlite3`) will fail with "invalid ELF header" errors. Always run `npm install` directly on the Linux server.
-
-### Deploy to Debian Server
-
-#### Step 1: Run Setup Script (as root)
-\`\`\`bash
-sudo bash setup.sh
-\`\`\`
-
-This script will:
-- Configure 1GB swap space
-- Install Node.js 20, PostgreSQL 15, Redis
-- Create `neoedu` system user
-- Configure Nginx reverse proxy
-- Setup PM2 for process management
-
-#### Step 2: Copy Source Code (without node_modules)
-\`\`\`bash
-# From your local machine
-rsync -avz --exclude 'node_modules' --exclude '.next' --exclude 'dist' frontend/ user@server:/opt/neoedu/frontend/
-rsync -avz --exclude 'node_modules' --exclude 'dist' backend/ user@server:/opt/neoedu/backend/
-\`\`\`
-
-#### Step 3: Build on Server
-\`\`\`bash
-# Frontend
-cd /opt/neoedu/frontend
-sudo -u neoedu npm install
-sudo -u neoedu npm run build
-
-# Backend
-cd /opt/neoedu/backend
-sudo -u neoedu npm install
-sudo -u neoedu npm run build
-\`\`\`
-
-#### Step 4: Configure Environment
-\`\`\`bash
-# Copy and edit backend .env
-sudo -u neoedu cp /opt/neoedu/backend/.env.example /opt/neoedu/backend/.env
-sudo -u neoedu nano /opt/neoedu/backend/.env
-
-# ⚠️ Change these values:
-# - DATABASE_URL password
-# - JWT_SECRET (use a random string)
-# - REDIS_URL (if different)
-\`\`\`
-
-#### Step 5: Start Services
-\`\`\`bash
-# Start with PM2
-sudo -u neoedu pm2 start /opt/neoedu/ecosystem.config.js
-
-# Save PM2 config (auto-restart on reboot)
-sudo -u neoedu pm2 save
-
-# Check status
-sudo -u neoedu pm2 status
-sudo -u neoedu pm2 logs
-\`\`\`
-
-### Access Points
 | Service | URL |
 |---------|-----|
-| Frontend | http://your-server-ip (via Nginx) |
-| Frontend Direct | http://your-server-ip:3000 |
-| Backend API | http://your-server-ip/api |
-| Backend Direct | http://your-server-ip:4000 |
+| Frontend | http://localhost:3000 |
+| Backend API | http://localhost:4000 |
+| Health Check | http://localhost:4000/health |
 
-### Troubleshooting
+---
 
-**bcrypt "invalid ELF header" error:**
-\`\`\`bash
-cd /opt/neoedu/backend
-sudo -u neoedu npm rebuild bcrypt
-# or
-sudo -u neoedu rm -rf node_modules && sudo -u neoedu npm install
-\`\`\`
+## 📱 Routes
 
-**PostgreSQL GPG key error (Debian 12+):**
-The setup script uses the modern `signed-by` approach instead of deprecated `apt-key`.
+### Public (Không cần đăng nhập)
+- `/` - Trang chủ
+- `/courses` - Duyệt khóa học
+- `/courses/[id]` - Chi tiết khóa học
+- `/login` - Đăng nhập
+- `/signup` - Đăng ký
 
-**Check service status:**
-\`\`\`bash
-sudo -u neoedu pm2 status        # PM2 apps
-sudo systemctl status nginx      # Nginx
-sudo systemctl status postgresql # PostgreSQL
-sudo systemctl status redis      # Redis
-\`\`\`
+### Dashboard (Cần đăng nhập)
+- `/dashboard` - Tổng quan
+- `/dashboard/courses` - Duyệt khóa học
+- `/dashboard/my-courses` - Khóa học của tôi
+- `/dashboard/profile` - Hồ sơ
+- `/dashboard/settings` - Cài đặt (ngôn ngữ, giao diện)
+
+---
+
+## 🌐 Đa ngôn ngữ
+
+- **Tiếng Việt** 🇻🇳 - Mặc định nếu IP từ Việt Nam
+- **English** 🇺🇸 - Mặc định cho các quốc gia khác
+
+Tự động phát hiện qua IP, hoặc chọn trong Settings.
+
+---
+
+## ⚙️ Đồng bộ Settings
+
+Khi đăng nhập, các cài đặt được lưu vào tài khoản:
+- **Ngôn ngữ** - Tiếng Việt / English
+- **Giao diện** - Light / Dark / System
+- **Thông báo** - Bật / Tắt
+
+Settings tự động đồng bộ khi thay đổi. Đăng nhập trên thiết bị khác sẽ tự động áp dụng cài đặt đã lưu.
+
+---
+
+## 🔧 Biến môi trường
+
+### Backend (.env)
+
+```env
+DATABASE_URL=postgresql://user:password@localhost:5432/neoedu
+REDIS_URL=redis://localhost:6379
+JWT_SECRET=your-super-secret-key
+COOKIE_SECRET=your-cookie-secret
+PORT=4000
+CORS_ORIGIN=http://localhost:3000
+```
+
+---
+
+## 🚀 Deploy lên Server
+
+```bash
+# 1. Chạy script cài đặt (root)
+sudo bash setup.sh
+
+# 2. Copy code
+rsync -avz --exclude 'node_modules' --exclude '.next' --exclude 'dist' \
+  ./ user@server:/opt/neoedu/
+
+# 3. Build trên server
+cd /opt/neoedu
+./start.sh install
+./start.sh build
+
+# 4. Chạy với PM2
+pm2 start ecosystem.config.js
+pm2 save
+```
+
+---
 
 ## 📄 License
 
-MIT License - Free for personal and commercial use.
+MIT License - Miễn phí cho cá nhân và thương mại.
 
-## 🤝 Contributing
+---
 
-Contributions welcome! Please read our contributing guidelines.
+<div align="center">
+  Made with ❤️ by NEO EDU Team
+</div>

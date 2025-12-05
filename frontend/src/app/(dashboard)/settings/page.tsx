@@ -9,6 +9,8 @@ import {
     Shield,
     Download,
     Trash2,
+    Languages,
+    Loader2,
 } from "lucide-react";
 import {
     Card,
@@ -17,40 +19,88 @@ import {
     CardTitle,
     Button,
 } from "@/components/ui";
-import { useUIStore } from "@/stores";
+import { useUIStore, useAuthStore } from "@/stores";
+import { useI18n, languageNames, locales, type Locale } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 export default function SettingsPage() {
-    const { theme, setTheme } = useUIStore();
-    const [notifications, setNotifications] = useState(true);
+    const { theme, setTheme, notifications, setNotifications, isSyncing } = useUIStore();
+    const { isAuthenticated } = useAuthStore();
+    const { locale, setLocale, t } = useI18n();
 
     const themeOptions = [
-        { value: "light", label: "Light", icon: Sun },
-        { value: "dark", label: "Dark", icon: Moon },
-        { value: "system", label: "System", icon: Monitor },
+        { value: "light", label: t("settings.light"), icon: Sun },
+        { value: "dark", label: t("settings.dark"), icon: Moon },
+        { value: "system", label: t("settings.system"), icon: Monitor },
     ] as const;
 
     return (
         <div className="max-w-2xl mx-auto space-y-6 animate-fade-in">
             {/* Header */}
-            <div>
-                <h1 className="text-2xl lg:text-3xl font-bold">Settings</h1>
-                <p className="text-muted-foreground mt-1">
-                    Customize your learning experience
-                </p>
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-2xl lg:text-3xl font-bold">{t("settings.title")}</h1>
+                    <p className="text-muted-foreground mt-1">
+                        {t("settings.titleDesc")}
+                    </p>
+                </div>
+                {isSyncing && isAuthenticated && (
+                    <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Syncing...</span>
+                    </div>
+                )}
             </div>
+
+            {/* Sync Info */}
+            {isAuthenticated && (
+                <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg text-sm text-muted-foreground">
+                    ✓ {t("settings.syncEnabled") || "Settings are synced to your account"}
+                </div>
+            )}
+
+            {/* Language */}
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <Languages className="w-5 h-5" />
+                        {t("settings.language")}
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="grid grid-cols-2 gap-3">
+                        {locales.map((loc) => (
+                            <button
+                                key={loc}
+                                onClick={() => setLocale(loc)}
+                                className={cn(
+                                    "flex items-center gap-3 p-4 rounded-xl border-2 transition-all",
+                                    locale === loc
+                                        ? "border-primary bg-primary/5"
+                                        : "border-border hover:border-muted-foreground"
+                                )}
+                            >
+                                <span className="text-2xl">
+                                    {loc === "vi" ? "🇻🇳" : "🇺🇸"}
+                                </span>
+                                <span className="font-medium">{languageNames[loc]}</span>
+                            </button>
+                        ))}
+                    </div>
+                </CardContent>
+            </Card>
 
             {/* Appearance */}
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <Sun className="w-5 h-5" />
-                        Appearance
+                        {t("settings.appearance")}
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div>
-                        <label className="block text-sm font-medium mb-3">Theme</label>
+                        <label className="block text-sm font-medium mb-3">{t("settings.theme")}</label>
                         <div className="grid grid-cols-3 gap-3">
                             {themeOptions.map((option) => (
                                 <button
@@ -77,15 +127,15 @@ export default function SettingsPage() {
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <Bell className="w-5 h-5" />
-                        Notifications
+                        {t("settings.notifications")}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="font-medium">Push Notifications</p>
+                            <p className="font-medium">{t("settings.pushNotifications")}</p>
                             <p className="text-sm text-muted-foreground">
-                                Receive notifications about new courses and updates
+                                {t("settings.pushNotificationsDesc")}
                             </p>
                         </div>
                         <button
@@ -111,13 +161,13 @@ export default function SettingsPage() {
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <Download className="w-5 h-5" />
-                        Data & Storage
+                        {t("settings.dataStorage")}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="font-medium">Offline Storage</p>
+                            <p className="font-medium">{t("settings.offlineStorage")}</p>
                             <p className="text-sm text-muted-foreground">
                                 Currently using 128 MB for offline courses
                             </p>
@@ -128,9 +178,9 @@ export default function SettingsPage() {
                     </div>
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="font-medium">Clear Cache</p>
+                            <p className="font-medium">{t("settings.clearCache")}</p>
                             <p className="text-sm text-muted-foreground">
-                                Free up space by clearing cached content
+                                {t("settings.clearCacheDesc")}
                             </p>
                         </div>
                         <Button variant="outline" size="sm">
@@ -145,15 +195,15 @@ export default function SettingsPage() {
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <Shield className="w-5 h-5" />
-                        Security
+                        {t("settings.security")}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="font-medium">Change Password</p>
+                            <p className="font-medium">{t("settings.changePassword")}</p>
                             <p className="text-sm text-muted-foreground">
-                                Update your account password
+                                {t("settings.changePasswordDesc")}
                             </p>
                         </div>
                         <Button variant="outline" size="sm">
@@ -168,15 +218,15 @@ export default function SettingsPage() {
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-red-600 dark:text-red-400">
                         <Trash2 className="w-5 h-5" />
-                        Danger Zone
+                        {t("settings.dangerZone")}
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="font-medium">Delete Account</p>
+                            <p className="font-medium">{t("settings.deleteAccount")}</p>
                             <p className="text-sm text-muted-foreground">
-                                Permanently delete your account and all data
+                                {t("settings.deleteAccountDesc")}
                             </p>
                         </div>
                         <Button variant="destructive" size="sm">
