@@ -74,6 +74,82 @@ coursesRouter.get("/", async (req: Request, res: Response, next: NextFunction) =
 });
 
 // ============================================
+// Get Managed Courses (Admin/Instructor)
+// ============================================
+coursesRouter.get("/manage", authenticate, requireRole(["admin", "instructor"]), async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { search, page = "1", limit = "20" } = req.query;
+        const offset = (parseInt(page as string) - 1) * parseInt(limit as string);
+        const userId = (req as Request & { userId: string }).userId;
+        const userRole = (req as Request & { userRole: string }).userRole;
+
+        let queryText = `
+            SELECT 
+              c.id, c.title, c.description, c.category, c.tags, c.thumbnail,
+              c.duration, c.enrolled_count, c.rating, c.created_at, c.published,
+              u.name as instructor_name, u.avatar as instructor_avatar
+            FROM courses c
+            JOIN users u ON c.instructor_id = u.id
+            WHERE 1=1
+        `;
+
+        const params: unknown[] = [];
+        let paramIndex = 1;
+
+        // If not admin, restrict to own courses
+        if (userRole !== "admin") {
+            queryText += ` AND c.instructor_id = $${paramIndex}`;
+            params.push(userId);
+            paramIndex++;
+        }
+
+        if (search) {
+            queryText += ` AND (
+                to_tsvector('english', c.title || ' ' || c.description) @@ 
+                plainto_tsquery('english', $${paramIndex})
+            )`;
+            params.push(search);
+            paramIndex++;
+        }
+
+        queryText += ` ORDER BY c.created_at DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+        params.push(parseInt(limit as string), offset);
+
+        const result = await query(queryText, params);
+
+        // Get total count
+        let countQuery = `SELECT COUNT(*) as total FROM courses c WHERE 1=1`;
+        const countParams: unknown[] = [];
+        let countParamIndex = 1;
+
+        if (userRole !== "admin") {
+            countQuery += ` AND c.instructor_id = $${countParamIndex}`;
+            countParams.push(userId);
+            countParamIndex++;
+        }
+
+        if (search) {
+            countQuery += ` AND (
+                to_tsvector('english', c.title || ' ' || c.description) @@ 
+                plainto_tsquery('english', $${countParamIndex})
+            )`;
+            countParams.push(search);
+        }
+
+        const countResult = await query(countQuery, countParams);
+
+        res.json({
+            courses: result.rows,
+            total: parseInt((countResult.rows[0] as { total: string }).total),
+            page: parseInt(page as string),
+            limit: parseInt(limit as string)
+        });
+    } catch (error) {
+        next(error);
+    }
+});
+
+// ============================================
 // Search Courses (Full Text)
 // ============================================
 coursesRouter.get("/search", async (req: Request, res: Response, next: NextFunction) => {
@@ -204,6 +280,7 @@ coursesRouter.put(
             const { id } = req.params;
             const data = updateCourseSchema.parse(req.body);
             const userId = (req as Request & { userId: string }).userId;
+            const userRole = (req as Request & { userRole: string }).userRole;
 
             // Check ownership
             const ownership = await query(
@@ -216,7 +293,7 @@ coursesRouter.put(
                 return;
             }
 
-            if ((ownership.rows[0] as { instructor_id: string }).instructor_id !== userId) {
+            if (userRole !== 'admin' && (ownership.rows[0] as { instructor_id: string }).instructor_id !== userId) {
                 res.status(403).json({ error: "Not authorized" });
                 return;
             }

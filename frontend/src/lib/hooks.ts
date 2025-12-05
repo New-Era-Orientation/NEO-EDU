@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { api, setCSRFToken, clearCSRFToken, type Course, type Lesson, type User } from "./api";
 import { useAuthStore } from "@/stores";
 
@@ -340,4 +340,23 @@ export function useRequireAuth(requiredRole?: "student" | "instructor" | "admin"
         authorized: isAuthenticated && authorized,
         user,
     };
+}
+
+// ============================================
+// Utility Hooks
+// ============================================
+export function useDebounce<T>(value: T, delay: number): T {
+    const [debouncedValue, setDebouncedValue] = useState(value);
+
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedValue(value);
+        }, delay);
+
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [value, delay]);
+
+    return debouncedValue;
 }

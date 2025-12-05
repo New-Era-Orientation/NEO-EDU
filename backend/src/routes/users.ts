@@ -271,3 +271,166 @@ usersRouter.get(
         }
     }
 );
+
+// ============================================
+// Admin: Create User (can create instructor/admin)
+// ============================================
+usersRouter.post(
+    "/",
+    authenticate,
+    requireRole(["admin"]),
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const { email, password, name, role, must_change_password = true } = req.body;
+
+            // Validate required fields
+            if (!email || !password || !name || !role) {
+                res.status(400).json({ error: "Email, password, name and role are required" });
+                return;
+            }
+
+            // Validate role
+            if (!["student", "instructor", "admin"].includes(role)) {
+                res.status(400).json({ error: "Invalid role" });
+                return;
+            }
+
+            // Check if email exists
+            const existing = await query(
+                "SELECT id FROM users WHERE email = $1",
+                [email]
+            );
+
+            if (existing.rows.length > 0) {
+                res.status(400).json({ error: "Email already registered" });
+                return;
+            }
+
+            // Hash password
+            const bcrypt = await import("bcrypt");
+            const hashedPassword = await bcrypt.default.hash(password, 12);
+
+            // Create user with must_change_password flag
+            const result = await query(
+                `INSERT INTO users (email, password_hash, name, role, must_change_password, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
+         RETURNING id, email, name, role, must_change_password, created_at`,
+                [email, hashedPassword, name, role, must_change_password]
+            );
+
+            res.status(201).json({
+                message: "User created successfully",
+                user: result.rows[0]
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+);
+// ============================================
+// Admin: Update User
+// ============================================
+usersRouter.put(
+    "/:id",
+    authenticate,
+    requireRole(["admin"]),
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const { id } = req.params;
+            const { name, role, email, password, bio, must_change_password } = req.body;
+
+            // Optional password update
+            let hashedPassword;
+            const updates: string[] = [];
+            const values: any[] = [];
+            let paramIndex = 1;
+
+            if (name) {
+                updates.push(`name = $${paramIndex++}`);
+                values.push(name);
+            }
+            if (role) {
+                updates.push(`role = $${paramIndex++}`);
+                values.push(role);
+            }
+            if (email) {
+                updates.push(`email = $${paramIndex++}`);
+                values.push(email);
+            }
+            if (bio !== undefined) {
+                updates.push(`bio = $${paramIndex++}`);
+                values.push(bio);
+            }
+            if (must_change_password !== undefined) {
+                updates.push(`must_change_password = $${paramIndex++}`);
+                values.push(must_change_password);
+            }
+            if (password) {
+                const bcrypt = await import("bcrypt");
+                hashedPassword = await bcrypt.default.hash(password, 12);
+                updates.push(`password_hash = $${paramIndex++}`);
+                values.push(hashedPassword);
+            }
+
+            if (updates.length === 0) {
+                res.status(400).json({ error: "No fields to update" });
+                return;
+            }
+
+            updates.push(`updated_at = NOW()`);
+            values.push(id);
+
+            const queryText = `
+                UPDATE users
+                SET ${updates.join(", ")}
+                WHERE id = $${paramIndex}
+                RETURNING id, email, name, role, must_change_password, updated_at
+            `;
+
+            const result = await query(queryText, values);
+
+            if (result.rows.length === 0) {
+                res.status(404).json({ error: "User not found" });
+                return;
+            }
+
+            res.json({ user: result.rows[0] });
+        } catch (error) {
+            next(error);
+        }
+    }
+);
+
+// ============================================
+// Admin: Delete User
+// ============================================
+usersRouter.delete(
+    "/:id",
+    authenticate,
+    requireRole(["admin"]),
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const { id } = req.params;
+
+            // Prevent deleting self
+            if (id === (req as any).userId) {
+                res.status(400).json({ error: "Cannot delete your own account" });
+                return;
+            }
+
+            const result = await query(
+                "DELETE FROM users WHERE id = $1 RETURNING id",
+                [id]
+            );
+
+            if (result.rows.length === 0) {
+                res.status(404).json({ error: "User not found" });
+                return;
+            }
+
+            res.json({ message: "User deleted successfully" });
+        } catch (error) {
+            next(error);
+        }
+    }
+);

@@ -53,11 +53,19 @@ start_all() {
     
     # Start backend in background
     echo -e "${BLUE}Starting backend server...${NC}"
+
+    # Auto-run migrations if migrate.sh exists
+    if [ -f "$SCRIPT_DIR/migrate.sh" ]; then
+        echo -e "${BLUE}Running database migrations...${NC}"
+        bash "$SCRIPT_DIR/migrate.sh"
+    fi
+
     (cd "$SCRIPT_DIR/backend" && npm run dev) &
     BACKEND_PID=$!
     
     # Wait a bit for backend to start
-    sleep 3
+    echo -e "${BLUE}Waiting for backend to be ready...${NC}"
+    sleep 5
     
     # Start frontend
     echo -e "${BLUE}Starting frontend server...${NC}"

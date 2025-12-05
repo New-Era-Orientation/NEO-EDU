@@ -20,6 +20,7 @@ CREATE TABLE users (
     avatar TEXT,
     bio TEXT,
     preferences JSONB DEFAULT '{"language": "vi", "theme": "system", "notifications": true}',
+    must_change_password BOOLEAN DEFAULT false,
     last_login_at TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -221,12 +222,14 @@ FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 -- ============================================
 -- Insert default admin user
--- Password: admin123 (change in production!)
+-- Email: admin@neoedu.vn
+-- Password: Admin@123 (MUST change after first login!)
 -- ============================================
-INSERT INTO users (email, password_hash, name, role)
+INSERT INTO users (email, password_hash, name, role, must_change_password)
 VALUES (
-    'admin@neoedu.local',
-    '$2b$10$rQZ7.5YKBxqZ5Q5Q5Q5Q5O5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5', -- bcrypt hash
+    'admin@neoedu.vn',
+    '$2b$12$LQv3c1yqBwfR8HdNxN.1L.J.lYYvjZhxqvJ.pFzxO3K8VHvGGxnFO', -- bcrypt hash for 'Admin@123'
     'Admin',
-    'admin'
+    'admin',
+    true
 ) ON CONFLICT DO NOTHING;

@@ -24,7 +24,7 @@ const registerSchema = z.object({
     email: z.string().email(),
     password: z.string().min(8),
     name: z.string().min(2).max(100),
-    role: z.enum(["student", "instructor"]).optional().default("student"),
+    // Public registration only allows student role
 });
 
 const loginSchema = z.object({
@@ -72,12 +72,12 @@ authRouter.post("/register", async (req: Request, res: Response, next: NextFunct
         // Hash password with stronger cost factor
         const hashedPassword = await bcrypt.hash(data.password, 12);
 
-        // Create user
+        // Create user (public registration is always student role)
         const result = await query(
             `INSERT INTO users (email, password_hash, name, role, created_at, updated_at)
-       VALUES ($1, $2, $3, $4, NOW(), NOW())
+       VALUES ($1, $2, $3, 'student', NOW(), NOW())
        RETURNING id, email, name, role, created_at`,
-            [data.email, hashedPassword, data.name, data.role]
+            [data.email, hashedPassword, data.name]
         );
 
         const user = result.rows[0] as {
@@ -129,7 +129,7 @@ authRouter.post("/login", async (req: Request, res: Response, next: NextFunction
 
         // Find user
         const result = await query(
-            "SELECT id, email, name, role, password_hash, avatar FROM users WHERE email = $1",
+            "SELECT id, email, name, role, password_hash, avatar, must_change_password FROM users WHERE email = $1",
             [data.email]
         );
 
@@ -145,6 +145,7 @@ authRouter.post("/login", async (req: Request, res: Response, next: NextFunction
             role: string;
             password_hash: string;
             avatar: string | null;
+            must_change_password: boolean;
         };
 
         // Verify password
@@ -189,6 +190,7 @@ authRouter.post("/login", async (req: Request, res: Response, next: NextFunction
             },
             token,
             csrfToken,
+            mustChangePassword: user.must_change_password,
         });
     } catch (error) {
         if (error instanceof z.ZodError) {

@@ -3,12 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Mail, Lock, Eye, EyeOff, User, GraduationCap, BookOpen } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, User } from "lucide-react";
 import { Button, Input } from "@/components/ui";
 import { useAuth } from "@/lib/hooks";
-import { cn } from "@/lib/utils";
-
-type Role = "student" | "instructor";
 
 export default function SignupPage() {
     const router = useRouter();
@@ -18,7 +15,6 @@ export default function SignupPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
-    const [role, setRole] = useState<Role>("student");
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState("");
 
@@ -43,7 +39,7 @@ export default function SignupPage() {
         }
 
         try {
-            await register({ name, email, password, role });
+            await register({ name, email, password });
             router.push("/dashboard");
         } catch (err) {
             setError(err instanceof Error ? err.message : "Registration failed");
@@ -68,58 +64,6 @@ export default function SignupPage() {
                         {error || (registerError instanceof Error ? registerError.message : "An error occurred")}
                     </div>
                 )}
-
-                {/* Role Selection */}
-                <div className="space-y-2">
-                    <label className="block text-sm font-medium text-foreground">
-                        I want to
-                    </label>
-                    <div className="grid grid-cols-2 gap-3">
-                        <button
-                            type="button"
-                            onClick={() => setRole("student")}
-                            className={cn(
-                                "flex items-center gap-3 p-4 rounded-xl border-2 transition-all",
-                                role === "student"
-                                    ? "border-primary bg-primary/5"
-                                    : "border-border hover:border-muted-foreground"
-                            )}
-                        >
-                            <div className={cn(
-                                "w-10 h-10 rounded-lg flex items-center justify-center",
-                                role === "student" ? "gradient-primary text-white" : "bg-muted"
-                            )}>
-                                <BookOpen className="w-5 h-5" />
-                            </div>
-                            <div className="text-left">
-                                <p className="font-medium">Learn</p>
-                                <p className="text-xs text-muted-foreground">As a student</p>
-                            </div>
-                        </button>
-
-                        <button
-                            type="button"
-                            onClick={() => setRole("instructor")}
-                            className={cn(
-                                "flex items-center gap-3 p-4 rounded-xl border-2 transition-all",
-                                role === "instructor"
-                                    ? "border-primary bg-primary/5"
-                                    : "border-border hover:border-muted-foreground"
-                            )}
-                        >
-                            <div className={cn(
-                                "w-10 h-10 rounded-lg flex items-center justify-center",
-                                role === "instructor" ? "gradient-primary text-white" : "bg-muted"
-                            )}>
-                                <GraduationCap className="w-5 h-5" />
-                            </div>
-                            <div className="text-left">
-                                <p className="font-medium">Teach</p>
-                                <p className="text-xs text-muted-foreground">As an instructor</p>
-                            </div>
-                        </button>
-                    </div>
-                </div>
 
                 {/* Name */}
                 <Input

@@ -13,6 +13,8 @@ import {
     PlusCircle,
     ChevronLeft,
     ChevronRight,
+    Shield,
+    FileText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUIStore, useAuthStore } from "@/stores";
@@ -32,6 +34,14 @@ const instructorNavItems = [
     { href: "/dashboard/students", label: "Students", icon: Users },
 ];
 
+const adminNavItems = [
+    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/dashboard/admin", label: "Admin Panel", icon: Shield },
+    { href: "/dashboard/admin/users", label: "Quản lý Users", icon: Users },
+    { href: "/dashboard/admin/courses", label: "Quản lý Courses", icon: BookOpen },
+    { href: "/dashboard/admin/lessons", label: "Quản lý Lessons", icon: FileText },
+];
+
 const bottomNavItems = [
     { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
@@ -41,8 +51,16 @@ export function Sidebar() {
     const { sidebarCollapsed, toggleSidebarCollapse } = useUIStore();
     const { user } = useAuthStore();
 
-    const isInstructor = user?.role === "instructor" || user?.role === "admin";
-    const navItems = isInstructor ? instructorNavItems : studentNavItems;
+    const isAdmin = user?.role === "admin";
+    const isInstructor = user?.role === "instructor";
+
+    // Choose navigation based on role
+    let navItems = studentNavItems;
+    if (isAdmin) {
+        navItems = adminNavItems;
+    } else if (isInstructor) {
+        navItems = instructorNavItems;
+    }
 
     return (
         <aside

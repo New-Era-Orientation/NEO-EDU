@@ -273,6 +273,24 @@ class ApiClient {
         );
     }
 
+    async getManagedCourses(params?: {
+        search?: string;
+        page?: number;
+        limit?: number;
+    }): Promise<{
+        courses: Course[];
+        total: number;
+        page: number;
+        limit: number;
+    }> {
+        const searchParams = new URLSearchParams();
+        if (params?.search) searchParams.set("search", params.search);
+        if (params?.page) searchParams.set("page", params.page.toString());
+        if (params?.limit) searchParams.set("limit", params.limit.toString());
+
+        return this.request("/courses/manage?" + searchParams.toString());
+    }
+
     async searchCourses(q: string, limit?: number): Promise<{ courses: Course[] }> {
         const searchParams = new URLSearchParams({ q });
         if (limit) searchParams.set("limit", limit.toString());
@@ -416,6 +434,65 @@ class ApiClient {
         return this.request<{ preferences: UserPreferences }>("/users/preferences", {
             method: "PUT",
             body: JSON.stringify(data),
+        });
+    }
+
+    // ============================================
+    // Admin Endpoints
+    // ============================================
+    async getUsers(params?: {
+        page?: number;
+        limit?: number;
+        role?: string;
+        search?: string;
+    }): Promise<{
+        users: User[];
+        total: number;
+        page: number;
+        limit: number;
+    }> {
+        const searchParams = new URLSearchParams();
+        if (params?.page) searchParams.set("page", params.page.toString());
+        if (params?.limit) searchParams.set("limit", params.limit.toString());
+        if (params?.role) searchParams.set("role", params.role);
+        if (params?.search) searchParams.set("search", params.search);
+
+        return this.request("/users?" + searchParams.toString());
+    }
+
+    async createUser(data: {
+        email: string;
+        password: string;
+        name: string;
+        role: string;
+        must_change_password?: boolean;
+    }): Promise<{ user: User }> {
+        return this.request("/users", {
+            method: "POST",
+            body: JSON.stringify(data),
+        });
+    }
+
+    async updateUser(
+        id: string,
+        data: Partial<{
+            name: string;
+            role: string;
+            email: string;
+            password: string;
+            bio: string;
+            must_change_password: boolean;
+        }>
+    ): Promise<{ user: User }> {
+        return this.request(`/users/${id}`, {
+            method: "PUT",
+            body: JSON.stringify(data),
+        });
+    }
+
+    async deleteUser(id: string): Promise<{ message: string }> {
+        return this.request<{ message: string }>(`/users/${id}`, {
+            method: "DELETE",
         });
     }
 

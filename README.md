@@ -95,6 +95,15 @@ cd frontend && npm run dev
 | Backend API | http://localhost:4000 |
 | Health Check | http://localhost:4000/health |
 
+### Tài khoản Admin mặc định
+
+| Field | Value |
+|-------|-------|
+| Email | `admin@neoedu.vn` |
+| Password | `Admin@123` |
+
+> ⚠️ **Bắt buộc đổi mật khẩu sau khi đăng nhập lần đầu!**
+
 ---
 
 ## 📱 Routes
@@ -117,10 +126,8 @@ cd frontend && npm run dev
 
 ## 🌐 Đa ngôn ngữ
 
-- **Tiếng Việt** 🇻🇳 - Mặc định nếu IP từ Việt Nam
-- **English** 🇺🇸 - Mặc định cho các quốc gia khác
-
-Tự động phát hiện qua IP, hoặc chọn trong Settings.
+- **Tiếng Việt** 🇻🇳 - Mặc định
+- **English** 🇺🇸 - Có thể chuyển trong Settings
 
 ---
 
