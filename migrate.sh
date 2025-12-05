@@ -29,6 +29,27 @@ DB_USER="${DB_USER:-neoedu}"
 echo -e "${YELLOW}📊 Running migrations...${NC}"
 echo ""
 
+# Check if users table exists, if not initialize from schema.sql
+echo -e "${BLUE}Checking database initialization...${NC}"
+TABLE_EXISTS=$(psql -h "$DB_HOST" -p "$DB_PORT" -d "$DB_NAME" -U "$DB_USER" -tAc "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'users')")
+
+if [ "$TABLE_EXISTS" != "t" ]; then
+    echo -e "${YELLOW}⚠️  Database not initialized. Initializing from schema.sql...${NC}"
+    if [ -f "./backend/src/db/schema.sql" ]; then
+        psql -h "$DB_HOST" -p "$DB_PORT" -d "$DB_NAME" -U "$DB_USER" -f "./backend/src/db/schema.sql"
+        echo -e "${GREEN}✅ Database initialized!${NC}"
+        # Skip remaining migrations as schema.sql should have them (or be the base)
+        # But for safety we continue to ensure everything is applied
+    else
+        echo -e "${RED}Error: backend/src/db/schema.sql not found!${NC}"
+        exit 1
+    fi
+else
+    echo -e "${GREEN}✅ Database already initialized.${NC}"
+fi
+
+echo ""
+
 # Migration: Add preferences column to users table
 echo -e "${BLUE}[1/3] Adding preferences column to users table...${NC}"
 
