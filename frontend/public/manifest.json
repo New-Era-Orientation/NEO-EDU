@@ -1,0 +1,42 @@
+{
+    "name": "NEO EDU",
+    "short_name": "NEO EDU",
+    "description": "Self-hosted, offline-first Learning Management System",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0f172a",
+    "theme_color": "#6366f1",
+    "orientation": "any",
+    "scope": "/",
+    "icons": [
+        {
+            "src": "/assets/logo.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/assets/logo.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/assets/logo.png",
+            "sizes": "384x384",
+            "type": "image/png"
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "/assets/logo.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "form_factor": "wide"
+        }
+    ],
+    "categories": [
+        "education",
+        "productivity"
+    ],
+    "prefer_related_applications": false
+}

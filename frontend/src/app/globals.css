@@ -1,0 +1,257 @@
+@import "tailwindcss";
+
+/* ============================================
+   NEO EDU Design System
+   ============================================ */
+
+:root {
+  /* Brand Colors */
+  --color-primary: 99 102 241;     /* Indigo-500 */
+  --color-primary-light: 129 140 248;
+  --color-primary-dark: 79 70 229;
+  
+  --color-secondary: 14 165 233;   /* Sky-500 */
+  --color-accent: 168 85 247;      /* Purple-500 */
+  --color-success: 34 197 94;      /* Green-500 */
+  --color-warning: 234 179 8;      /* Yellow-500 */
+  --color-error: 239 68 68;        /* Red-500 */
+  
+  /* Light Mode */
+  --background: 255 255 255;
+  --foreground: 15 23 42;          /* Slate-900 */
+  --muted: 241 245 249;            /* Slate-100 */
+  --muted-foreground: 100 116 139; /* Slate-500 */
+  --card: 255 255 255;
+  --card-foreground: 15 23 42;
+  --border: 226 232 240;           /* Slate-200 */
+  --input: 226 232 240;
+  --ring: 99 102 241;
+  
+  /* Sidebar */
+  --sidebar-width: 280px;
+  --sidebar-collapsed-width: 72px;
+  
+  /* Z-index layers */
+  --z-dropdown: 50;
+  --z-sticky: 100;
+  --z-overlay: 200;
+  --z-modal: 300;
+  --z-toast: 400;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Dark Mode */
+    --background: 15 23 42;        /* Slate-900 */
+    --foreground: 248 250 252;     /* Slate-50 */
+    --muted: 30 41 59;             /* Slate-800 */
+    --muted-foreground: 148 163 184; /* Slate-400 */
+    --card: 30 41 59;              /* Slate-800 */
+    --card-foreground: 248 250 252;
+    --border: 51 65 85;            /* Slate-700 */
+    --input: 51 65 85;
+  }
+}
+
+/* ============================================
+   Base Styles
+   ============================================ */
+
+@theme inline {
+  --color-background: rgb(var(--background));
+  --color-foreground: rgb(var(--foreground));
+  --color-muted: rgb(var(--muted));
+  --color-muted-foreground: rgb(var(--muted-foreground));
+  --color-card: rgb(var(--card));
+  --color-card-foreground: rgb(var(--card-foreground));
+  --color-border: rgb(var(--border));
+  --color-primary: rgb(var(--color-primary));
+  --color-primary-light: rgb(var(--color-primary-light));
+  --color-primary-dark: rgb(var(--color-primary-dark));
+  --font-sans: var(--font-inter);
+}
+
+* {
+  border-color: rgb(var(--border));
+}
+
+body {
+  background: rgb(var(--background));
+  color: rgb(var(--foreground));
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================
+   Scrollbar Styling
+   ============================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgb(var(--muted));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--muted-foreground) / 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--muted-foreground) / 0.5);
+}
+
+/* ============================================
+   Focus Styles
+   ============================================ */
+
+:focus-visible {
+  outline: 2px solid rgb(var(--color-primary));
+  outline-offset: 2px;
+}
+
+/* ============================================
+   Selection
+   ============================================ */
+
+::selection {
+  background: rgb(var(--color-primary) / 0.2);
+  color: rgb(var(--foreground));
+}
+
+/* ============================================
+   Glassmorphism Utilities
+   ============================================ */
+
+.glass {
+  background: rgb(var(--card) / 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgb(var(--border) / 0.5);
+}
+
+.glass-dark {
+  background: rgb(15 23 42 / 0.9);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* ============================================
+   Gradient Utilities
+   ============================================ */
+
+.gradient-primary {
+  background: linear-gradient(135deg, rgb(var(--color-primary)), rgb(var(--color-secondary)));
+}
+
+.gradient-accent {
+  background: linear-gradient(135deg, rgb(var(--color-accent)), rgb(var(--color-primary)));
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, rgb(var(--color-primary)), rgb(var(--color-accent)));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ============================================
+   Animation Utilities
+   ============================================ */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0; 
+    transform: translateY(10px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+@keyframes slideDown {
+  from { 
+    opacity: 0; 
+    transform: translateY(-10px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+.animate-slide-down {
+  animation: slideDown 0.3s ease-out;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgb(var(--muted)) 25%,
+    rgb(var(--muted-foreground) / 0.1) 50%,
+    rgb(var(--muted)) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* ============================================
+   Card Hover Effect
+   ============================================ */
+
+.card-hover {
+  transition: all 0.2s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 10px 15px -3px rgb(0 0 0 / 0.1),
+    0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+/* ============================================
+   PWA Install Prompt Styles
+   ============================================ */
+
+.pwa-install-prompt {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--z-toast);
+  animation: slideUp 0.3s ease-out;
+}
