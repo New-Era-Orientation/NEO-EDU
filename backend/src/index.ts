@@ -2,6 +2,7 @@ import express, { type Request, type Response, type NextFunction } from "express
 import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import cookieParser from "cookie-parser";
 import { createServer } from "http";
 import { Server as SocketServer } from "socket.io";
 import { pool, testConnection } from "./services/db.js";
@@ -19,6 +20,7 @@ import { errorHandler } from "./middleware/error.js";
 const PORT = process.env.PORT || 4000;
 const NODE_ENV = process.env.NODE_ENV || "development";
 const CORS_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:3000";
+const COOKIE_SECRET = process.env.COOKIE_SECRET || "cookie_secret_key_change_in_production";
 
 // ============================================
 // Express App Setup
@@ -49,13 +51,16 @@ app.use(helmet({
     crossOriginEmbedderPolicy: false,
 }));
 
-// CORS
+// CORS with credentials support for cookies
 app.use(cors({
     origin: CORS_ORIGIN,
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-CSRF-Token"],
 }));
+
+// Cookie parser for HTTP-only cookies
+app.use(cookieParser(COOKIE_SECRET));
 
 // Rate limiting (memory-efficient)
 const limiter = rateLimit({
