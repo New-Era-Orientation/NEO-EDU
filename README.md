@@ -10,6 +10,13 @@
   [![Next.js](https://img.shields.io/badge/Next.js-15-black.svg)](https://nextjs.org)
 </div>
 
+> [!WARNING]
+> **Project Status**: Đang phát triển tích cực 🚧
+>
+> - **Wiki/Exam**: Giao diện chỉ để cho đủ số lượng (placeholder UI)
+> - **Content**: Chưa có nội dung, cần tạo thủ công
+> - **Features**: Admin Panel cơ bản, User/Course CRUD
+
 ---
 
 ## 🚀 Tính năng
@@ -103,6 +110,14 @@ cd frontend && npm run dev
 | Password | `Admin@123` |
 
 > ⚠️ **Bắt buộc đổi mật khẩu sau khi đăng nhập lần đầu!**
+
+### Tài khoản Database (SQL)
+
+| Field | Value |
+|-------|-------|
+| User | `neoedu` |
+| Password | `neoedu_secure_password_change_me` |
+| Database | `neoedu_db` |
 
 ---
 
