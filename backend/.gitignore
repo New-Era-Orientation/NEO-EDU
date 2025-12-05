@@ -1,0 +1,64 @@
+# =============================================
+# NEO-EDU Backend .gitignore
+# =============================================
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# TypeScript
+*.tsbuildinfo
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Testing
+coverage/
+.nyc_output/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary
+tmp/
+temp/
+
+# Database files
+*.db
+*.sqlite
+data/
+
+# SSL certificates
+*.pem
+*.key
+*.crt
+
+# Uploads
+uploads/
+
+# PM2
+.pm2/
+
+# Debug
+.debug/
+
+# Cache
+.cache/
