@@ -15,6 +15,7 @@ import {
     ChevronRight,
     Shield,
     FileText,
+    Trophy,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUIStore, useAuthStore } from "@/stores";
@@ -40,6 +41,7 @@ const adminNavItems = [
     { href: "/dashboard/admin/users", label: "Quản lý Users", icon: Users },
     { href: "/dashboard/admin/courses", label: "Quản lý Courses", icon: BookOpen },
     { href: "/dashboard/admin/lessons", label: "Quản lý Lessons", icon: FileText },
+    { href: "/dashboard/admin/contests", label: "Quản lý Contests", icon: Trophy },
 ];
 
 const bottomNavItems = [

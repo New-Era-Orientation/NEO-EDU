@@ -290,8 +290,8 @@ usersRouter.post(
             }
 
             // Validate role
-            if (!["student", "instructor", "admin"].includes(role)) {
-                res.status(400).json({ error: "Invalid role" });
+            if (!["student", "instructor"].includes(role)) {
+                res.status(400).json({ error: "Invalid role. Admin accounts must be created via CLI." });
                 return;
             }
 

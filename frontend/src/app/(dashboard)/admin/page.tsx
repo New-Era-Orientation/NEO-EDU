@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Users, BookOpen, FileText, Shield, ArrowRight } from "lucide-react";
+import { Users, BookOpen, FileText, Shield, ArrowRight, Trophy } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui";
 
 export default function AdminDashboardPage() {
@@ -30,6 +30,14 @@ export default function AdminDashboardPage() {
             color: "text-green-500",
             bg: "bg-green-500/10",
         },
+        {
+            label: "Quản lý Contests",
+            value: "Cuộc thi & Live",
+            icon: Trophy,
+            href: "/dashboard/admin/contests",
+            color: "text-orange-500",
+            bg: "bg-orange-500/10",
+        },
     ];
 
     return (
@@ -41,7 +49,8 @@ export default function AdminDashboardPage() {
                 </p>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+
                 {stats.map((stat) => (
                     <Link key={stat.href} href={stat.href}>
                         <Card className="hover:border-primary/50 transition-all cursor-pointer h-full">

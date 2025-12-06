@@ -12,6 +12,7 @@ import { authRouter } from "./routes/auth.js";
 import { coursesRouter } from "./routes/courses.js";
 import { lessonsRouter } from "./routes/lessons.js";
 import { usersRouter } from "./routes/users.js";
+import { contestsRouter } from "./routes/contests.js";
 import { errorHandler } from "./middleware/error.js";
 
 // ============================================
@@ -119,6 +120,8 @@ app.use("/auth", authRouter);
 app.use("/courses", coursesRouter);
 app.use("/lessons", lessonsRouter);
 app.use("/users", usersRouter);
+app.use("/contests", contestsRouter);
+
 
 // ============================================
 // 404 Handler

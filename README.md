@@ -14,8 +14,10 @@
 > **Project Status**: Đang phát triển tích cực 🚧
 >
 > - **Wiki/Exam**: Giao diện chỉ để cho đủ số lượng (placeholder UI)
+> - **Contests**: Tạo, quản lý và tổ chức thi trực tuyến với Live Leaderboard ✅
 > - **Content**: Chưa có nội dung, cần tạo thủ công
-> - **Features**: Admin Panel cơ bản, User/Course CRUD
+> - **Features**: Admin Panel (Users, Courses, Contests), User/Course CRUD
+
 
 ---
 
@@ -32,6 +34,8 @@
 - ✏️ **Tạo khóa học** - Quản lý nội dung dễ dàng
 - 📹 **Video & Bài viết** - Nhiều loại nội dung
 - 👥 **Quản lý học viên** - Xem danh sách đăng ký
+- 🏆 **Tổ chức thi** - Tạo cuộc thi & Xem Live Leaderboard
+
 
 ### Bảo mật
 - 🔒 **Cookie HTTP-only** - Bảo vệ token khỏi XSS

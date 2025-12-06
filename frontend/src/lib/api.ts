@@ -69,6 +69,46 @@ export interface UserPreferences {
     notifications: boolean;
 }
 
+export interface ContestQuestion {
+    id: string;
+    question: string;
+    type: "multiple-choice" | "true-false" | "short-answer";
+    options?: string[];
+    correctAnswer?: string | string[];
+    explanation?: string;
+    points: number;
+}
+
+export interface Contest {
+    id: string;
+    title: string;
+    description?: string;
+    questions: ContestQuestion[];
+    passing_score: number;
+    time_limit: number;
+    start_time: string;
+    end_time: string;
+    max_participants?: number;
+    is_public: boolean;
+    status: "draft" | "upcoming" | "active" | "ended";
+    created_by: string;
+    creator_name?: string;
+    created_at: string;
+    updated_at: string;
+    participant_count?: number;
+    question_count?: number;
+}
+
+export interface ContestLeaderboardEntry {
+    user_id: string;
+    name: string;
+    avatar?: string;
+    score: number;
+    rank: number;
+    submitted_at: string;
+}
+
+
 // ============================================
 // CSRF Token Management
 // ============================================
@@ -497,6 +537,105 @@ class ApiClient {
     }
 
     // ============================================
+    // Contest Endpoints
+    // ============================================
+    async getContests(params?: {
+        status?: string;
+        page?: number;
+        limit?: number;
+    }): Promise<{
+        contests: Contest[];
+        total: number;
+        page: number;
+        limit: number;
+    }> {
+        const searchParams = new URLSearchParams();
+        if (params?.status) searchParams.set("status", params.status);
+        if (params?.page) searchParams.set("page", params.page.toString());
+        if (params?.limit) searchParams.set("limit", params.limit.toString());
+
+        return this.request("/contests?" + searchParams.toString());
+    }
+
+    async getAdminContests(params?: {
+        status?: string;
+        search?: string;
+        page?: number;
+        limit?: number;
+    }): Promise<{
+        contests: Contest[];
+        total: number;
+        page: number;
+        limit: number;
+    }> {
+        const searchParams = new URLSearchParams();
+        if (params?.status) searchParams.set("status", params.status);
+        if (params?.search) searchParams.set("search", params.search);
+        if (params?.page) searchParams.set("page", params.page.toString());
+        if (params?.limit) searchParams.set("limit", params.limit.toString());
+
+        return this.request("/contests/admin/all?" + searchParams.toString());
+    }
+
+    async getContest(id: string): Promise<{ contest: Contest }> {
+        return this.request<{ contest: Contest }>(`/contests/${id}`);
+    }
+
+    async createContest(data: Partial<Contest>): Promise<{ contest: Contest }> {
+        return this.request<{ contest: Contest }>("/contests", {
+            method: "POST",
+            body: JSON.stringify(data),
+        });
+    }
+
+    async updateContest(id: string, data: Partial<Contest>): Promise<{ contest: Contest }> {
+        return this.request<{ contest: Contest }>(`/contests/${id}`, {
+            method: "PUT",
+            body: JSON.stringify(data),
+        });
+    }
+
+    async deleteContest(id: string): Promise<{ message: string }> {
+        return this.request<{ message: string }>(`/contests/${id}`, {
+            method: "DELETE",
+        });
+    }
+
+    async getContestLeaderboard(id: string): Promise<{ leaderboard: ContestLeaderboardEntry[] }> {
+        return this.request<{ leaderboard: ContestLeaderboardEntry[] }>(`/contests/${id}/leaderboard`);
+    }
+
+    async registerForContest(id: string): Promise<{ message: string }> {
+        return this.request<{ message: string }>(`/contests/${id}/register`, {
+            method: "POST",
+        });
+    }
+
+    async startContest(id: string): Promise<{
+        message: string;
+        questions: ContestQuestion[];
+        time_limit: number
+    }> {
+        return this.request(`/contests/${id}/start`, {
+            method: "POST",
+        });
+    }
+
+    async submitContest(id: string, answers: Record<string, string | string[]>): Promise<{
+        message: string;
+        score: number;
+        rank: number;
+        contestId: string;
+        userId: string;
+        userName: string;
+    }> {
+        return this.request(`/contests/${id}/submit`, {
+            method: "POST",
+            body: JSON.stringify({ answers }),
+        });
+    }
+
+    // ============================================
     // Health Check
     // ============================================
     async healthCheck(): Promise<{
@@ -506,6 +645,7 @@ class ApiClient {
     }> {
         return this.request("/health");
     }
+
 }
 
 // Export singleton instance

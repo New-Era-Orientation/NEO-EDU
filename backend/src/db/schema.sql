@@ -221,10 +221,57 @@ BEFORE UPDATE ON lessons
 FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 -- ============================================
+-- Contests Table (based on quizzes pattern)
+-- ============================================
+CREATE TABLE contests (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    title VARCHAR(200) NOT NULL,
+    description TEXT,
+    questions JSONB NOT NULL DEFAULT '[]',
+    passing_score INTEGER DEFAULT 70,
+    time_limit INTEGER NOT NULL DEFAULT 60,
+    start_time TIMESTAMP WITH TIME ZONE NOT NULL,
+    end_time TIMESTAMP WITH TIME ZONE NOT NULL,
+    max_participants INTEGER,
+    is_public BOOLEAN DEFAULT true,
+    status VARCHAR(20) DEFAULT 'draft' CHECK (status IN ('draft', 'upcoming', 'active', 'ended')),
+    created_by UUID NOT NULL REFERENCES users(id),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_contests_status ON contests(status);
+CREATE INDEX idx_contests_start_time ON contests(start_time);
+CREATE INDEX idx_contests_created_by ON contests(created_by);
+
+-- ============================================
+-- Contest Participants Table
+-- ============================================
+CREATE TABLE contest_participants (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    contest_id UUID NOT NULL REFERENCES contests(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    answers JSONB DEFAULT '{}',
+    score INTEGER DEFAULT 0,
+    started_at TIMESTAMP WITH TIME ZONE,
+    submitted_at TIMESTAMP WITH TIME ZONE,
+    UNIQUE(contest_id, user_id)
+);
+
+CREATE INDEX idx_contest_participants_contest ON contest_participants(contest_id);
+CREATE INDEX idx_contest_participants_user ON contest_participants(user_id);
+CREATE INDEX idx_contest_participants_score ON contest_participants(contest_id, score DESC);
+
+CREATE TRIGGER trigger_contests_updated_at
+BEFORE UPDATE ON contests
+FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+-- ============================================
 -- Insert default admin user
 -- Email: admin@neoedu.vn
 -- Password: Admin@123 (MUST change after first login!)
 -- ============================================
+
 INSERT INTO users (email, password_hash, name, role, must_change_password)
 VALUES (
     'admin@neoedu.vn',

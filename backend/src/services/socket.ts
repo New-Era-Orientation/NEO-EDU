@@ -54,6 +54,19 @@ export function setupSocketHandlers(io: SocketServer): void {
         });
 
         // ----------------------------------------
+        // Contest Room Management (Live Leaderboard)
+        // ----------------------------------------
+        socket.on("join:contest", (contestId: string) => {
+            socket.join(`contest:${contestId}`);
+            console.log(`User ${socket.userId} joined contest ${contestId}`);
+        });
+
+        socket.on("leave:contest", (contestId: string) => {
+            socket.leave(`contest:${contestId}`);
+            console.log(`User ${socket.userId} left contest ${contestId}`);
+        });
+
+        // ----------------------------------------
         // Lesson Progress
         // ----------------------------------------
         socket.on("progress:update", (data: {
@@ -139,3 +152,13 @@ export function broadcastToAll(
 ): void {
     io.emit(event, data);
 }
+
+export function broadcastToContest(
+    io: SocketServer,
+    contestId: string,
+    event: string,
+    data: unknown
+): void {
+    io.to(`contest:${contestId}`).emit(event, data);
+}
+
