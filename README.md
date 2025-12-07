@@ -10,15 +10,6 @@
   [![Next.js](https://img.shields.io/badge/Next.js-15-black.svg)](https://nextjs.org)
 </div>
 
-> [!WARNING]
-> **Project Status**: Đang phát triển tích cực 🚧
->
-> - **Wiki/Exam**: Giao diện chỉ để cho đủ số lượng (placeholder UI)
-> - **Contests**: Tạo, quản lý và tổ chức thi trực tuyến với Live Leaderboard ✅
-> - **Content**: Chưa có nội dung, cần tạo thủ công
-> - **Features**: Admin Panel (Users, Courses, Contests), User/Course CRUD
-
-
 ---
 
 ## 🚀 Tính năng
@@ -28,7 +19,8 @@
 - 💾 **Học Offline** - Hoạt động không cần internet
 - 📊 **Theo dõi tiến độ** - Xem hành trình học tập
 - 🌐 **Đa ngôn ngữ** - Tiếng Việt & English
-- ⚙️ **Đồng bộ Settings** - Cài đặt lưu theo tài khoản
+- 📝 **Làm bài thi** - Nhiều loại câu hỏi (MCQ, Đúng/Sai, Trả lời ngắn)
+- 📖 **Wiki** - Tra cứu tài liệu học tập
 
 ### Cho giảng viên
 - ✏️ **Tạo khóa học** - Quản lý nội dung dễ dàng
@@ -36,6 +28,13 @@
 - 👥 **Quản lý học viên** - Xem danh sách đăng ký
 - 🏆 **Tổ chức thi** - Tạo cuộc thi & Xem Live Leaderboard
 
+### Cho Admin
+- 👤 **Quản lý Users** - CRUD users, phân quyền
+- 📚 **Quản lý Courses** - Duyệt, chỉnh sửa khóa học
+- 📝 **Quản lý Exams** - Tạo bài thi, xem kết quả
+- 📖 **Quản lý Wiki** - Thêm, sửa, xóa bài viết
+- 🏆 **Quản lý Contests** - Tổ chức cuộc thi trực tuyến
+- 📊 **Analytics** - Thống kê người dùng, khóa học
 
 ### Bảo mật
 - 🔒 **Cookie HTTP-only** - Bảo vệ token khỏi XSS
@@ -56,28 +55,32 @@
 
 ---
 
-## 🛠️ Cài đặt nhanh
+## 🛠️ Cài đặt
 
 ### Yêu cầu
 - Node.js 20+
 - PostgreSQL 15+
-- Redis
+- Redis (optional)
 
-### Cách 1: Dùng Script (Khuyến nghị)
+### Cách 1: Dùng Setup Script (Khuyến nghị)
 
 ```bash
-# Cấp quyền
-chmod +x start.sh
+# Clone repository
+git clone https://github.com/your-repo/neoedu.git
+cd neoedu
 
-# Cài dependencies & chạy
-./start.sh install
-./start.sh
-
-# Hoặc chạy riêng
-./start.sh frontend  # Chỉ frontend
-./start.sh backend   # Chỉ backend
-./start.sh build     # Build production
+# Chạy script setup
+chmod +x setup.sh
+./setup.sh
 ```
+
+Script sẽ tự động:
+- ✅ Kiểm tra dependencies
+- ✅ Tạo database PostgreSQL
+- ✅ Chạy schema SQL
+- ✅ Cài đặt npm packages
+- ✅ Tạo file .env
+- ✅ Tạo admin user
 
 ### Cách 2: Thủ công
 
@@ -87,13 +90,17 @@ cd frontend && npm install && cd ..
 cd backend && npm install && cd ..
 
 # 2. Tạo database
-psql -U postgres -c "CREATE DATABASE neoedu_dev;"
-psql -U postgres -d neoedu_dev -f backend/src/db/schema.sql
+sudo -u postgres psql -c "CREATE DATABASE neoedu;"
+sudo -u postgres psql -d neoedu -f backend/src/db/schema.sql
 
-# 3. Cấu hình môi trường
+# 3. Tạo file .env
 cp backend/.env.example backend/.env
+# Chỉnh sửa backend/.env với thông tin database
 
-# 4. Chạy
+# 4. Tạo admin user
+cd backend && npm run cli create-admin admin@neoedu.vn "Admin" Admin@123
+
+# 5. Chạy
 cd backend && npm run dev &
 cd frontend && npm run dev
 ```
@@ -103,8 +110,8 @@ cd frontend && npm run dev
 | Service | URL |
 |---------|-----|
 | Frontend | http://localhost:3000 |
-| Backend API | http://localhost:4000 |
-| Health Check | http://localhost:4000/health |
+| Backend API | http://localhost:5000 |
+| Health Check | http://localhost:5000/health |
 
 ### Tài khoản Admin mặc định
 
@@ -115,49 +122,118 @@ cd frontend && npm run dev
 
 > ⚠️ **Bắt buộc đổi mật khẩu sau khi đăng nhập lần đầu!**
 
-### Tài khoản Database (SQL)
+---
 
-| Field | Value |
-|-------|-------|
-| User | `neoedu` |
-| Password | `neoedu_secure_password_change_me` |
-| Database | `neoedu_db` |
+## 💻 CLI Commands
+
+Backend CLI cho phép quản lý qua command line:
+
+```bash
+cd backend
+npm run cli <command> [options]
+```
+
+### Quản lý Admin
+
+| Lệnh | Mô tả |
+|------|-------|
+| `create-admin <email> <name> [password]` | Tạo admin mới |
+| `list-admins` | Liệt kê tất cả admin |
+| `delete-admin <email>` | Xóa admin |
+
+### Quản lý User
+
+| Lệnh | Mô tả |
+|------|-------|
+| `reset-password <email> [new-password]` | Reset mật khẩu user |
+| `change-role <email> <role>` | Đổi role (student/instructor/admin) |
+| `list-users` | Liệt kê users |
+
+### Database
+
+| Lệnh | Mô tả |
+|------|-------|
+| `db:migrate` | Chạy migrations |
+| `db:seed` | Seed dữ liệu mẫu |
+| `db:reset` | Reset database |
+
+### Ví dụ
+
+```bash
+# Tạo admin mới
+npm run cli create-admin teacher@school.edu "Nguyen Van A" MyPassword123
+
+# Reset mật khẩu
+npm run cli reset-password user@email.com NewPassword123
+
+# Đổi role thành instructor
+npm run cli change-role user@email.com instructor
+
+# Xem danh sách admin
+npm run cli list-admins
+```
 
 ---
 
 ## 📱 Routes
 
-### Public (Không cần đăng nhập)
-- `/` - Trang chủ
-- `/courses` - Duyệt khóa học
-- `/courses/[id]` - Chi tiết khóa học
-- `/login` - Đăng nhập
-- `/signup` - Đăng ký
+### Public (Guest có thể truy cập)
+| Route | Mô tả |
+|-------|-------|
+| `/` | Trang chủ |
+| `/login` | Đăng nhập |
+| `/signup` | Đăng ký |
+| `/dashboard` | Dashboard (xem tổng quan) |
+| `/dashboard/courses` | Duyệt khóa học |
+| `/dashboard/courses/[id]` | Chi tiết khóa học |
+| `/dashboard/wiki` | Danh sách Wiki |
+| `/dashboard/wiki/[slug]` | Chi tiết Wiki |
+| `/dashboard/exams` | Danh sách bài thi |
+| `/dashboard/exams/[id]` | Chi tiết bài thi |
 
-### Dashboard (Cần đăng nhập)
-- `/dashboard` - Tổng quan
-- `/dashboard/courses` - Duyệt khóa học
-- `/dashboard/my-courses` - Khóa học của tôi
-- `/dashboard/profile` - Hồ sơ
-- `/dashboard/settings` - Cài đặt (ngôn ngữ, giao diện)
+### Yêu cầu đăng nhập
+| Route | Mô tả |
+|-------|-------|
+| `/dashboard/my-courses` | Khóa học của tôi |
+| `/dashboard/profile` | Hồ sơ cá nhân |
+| `/dashboard/settings` | Cài đặt |
+| `/dashboard/exams/[id]/take` | Làm bài thi |
+| `/dashboard/exams/[id]/result` | Xem kết quả |
+
+### Admin Only
+| Route | Mô tả |
+|-------|-------|
+| `/dashboard/admin` | Admin Panel |
+| `/dashboard/admin/users` | Quản lý Users |
+| `/dashboard/admin/courses` | Quản lý Courses |
+| `/dashboard/admin/lessons` | Quản lý Lessons |
+| `/dashboard/admin/exams` | Quản lý Exams |
+| `/dashboard/admin/wiki` | Quản lý Wiki |
+| `/dashboard/admin/contests` | Quản lý Contests |
+| `/dashboard/admin/analytics` | Thống kê |
+| `/dashboard/admin/settings` | Cài đặt hệ thống |
 
 ---
 
-## 🌐 Đa ngôn ngữ
+## 📝 Loại câu hỏi trong Exam
 
-- **Tiếng Việt** 🇻🇳 - Mặc định
-- **English** 🇺🇸 - Có thể chuyển trong Settings
+### 1. Multiple Choice (Trắc nghiệm)
+- 4 đáp án A, B, C, D
+- Chọn 1 đáp án đúng
 
----
+### 2. True/False (Đúng/Sai)
+- 4 ý nhỏ: a), b), c), d)
+- Chọn Đ (Đúng) hoặc S (Sai) cho mỗi ý
+- **Thang điểm:**
+  - 1 ý đúng = 0.1 điểm
+  - 2 ý đúng = 0.25 điểm
+  - 3 ý đúng = 0.5 điểm
+  - 4 ý đúng = 1 điểm
 
-## ⚙️ Đồng bộ Settings
-
-Khi đăng nhập, các cài đặt được lưu vào tài khoản:
-- **Ngôn ngữ** - Tiếng Việt / English
-- **Giao diện** - Light / Dark / System
-- **Thông báo** - Bật / Tắt
-
-Settings tự động đồng bộ khi thay đổi. Đăng nhập trên thiết bị khác sẽ tự động áp dụng cài đặt đã lưu.
+### 3. Short Answer (Trả lời ngắn)
+- Nhập đáp án số
+- Chỉ cho phép: số, dấu phẩy, dấu âm
+- Ví dụ: `-2,5` hoặc `100`
 
 ---
 
@@ -166,35 +242,127 @@ Settings tự động đồng bộ khi thay đổi. Đăng nhập trên thiết 
 ### Backend (.env)
 
 ```env
+# Server
+PORT=5000
+NODE_ENV=development
+
+# Database
 DATABASE_URL=postgresql://user:password@localhost:5432/neoedu
+
+# JWT
+JWT_SECRET=your-super-secret-key-change-me
+JWT_EXPIRES_IN=7d
+
+# Redis
 REDIS_URL=redis://localhost:6379
-JWT_SECRET=your-super-secret-key
-COOKIE_SECRET=your-cookie-secret
-PORT=4000
+
+# CORS
 CORS_ORIGIN=http://localhost:3000
+
+# Cookie
+COOKIE_SECRET=your-cookie-secret
+```
+
+### Frontend (.env.local)
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:5000/api
 ```
 
 ---
 
 ## 🚀 Deploy lên Server
 
+### Cách 1: Dùng Setup Script
+
 ```bash
-# 1. Chạy script cài đặt (root)
-sudo bash setup.sh
+# SSH vào server
+ssh user@server
 
-# 2. Copy code
-rsync -avz --exclude 'node_modules' --exclude '.next' --exclude 'dist' \
-  ./ user@server:/opt/neoedu/
+# Clone code
+git clone https://github.com/your-repo/neoedu.git
+cd neoedu
 
-# 3. Build trên server
-cd /opt/neoedu
-./start.sh install
-./start.sh build
+# Chạy setup
+chmod +x setup.sh
+./setup.sh
+```
 
-# 4. Chạy với PM2
+### Cách 2: Dùng PM2
+
+```bash
+# Build
+cd frontend && npm run build
+cd backend && npm run build
+
+# Chạy với PM2
 pm2 start ecosystem.config.js
 pm2 save
+pm2 startup
 ```
+
+### Nginx Config
+
+```nginx
+server {
+    listen 80;
+    server_name yourdomain.com;
+
+    # Frontend
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    # Backend API
+    location /api {
+        proxy_pass http://localhost:5000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+```
+
+---
+
+## 🐛 Troubleshooting
+
+### Lỗi "relation does not exist"
+
+Database chưa có bảng. Chạy lại schema:
+
+```bash
+sudo -u postgres psql -d neoedu -f backend/src/db/schema.sql
+```
+
+### Lỗi "role does not exist"
+
+Kết nối với user postgres:
+
+```bash
+sudo -u postgres psql -d neoedu
+```
+
+### Lỗi Redis connection
+
+Redis không bắt buộc. Nếu không có Redis, caching sẽ bị disable:
+
+```bash
+# Cài Redis (Ubuntu/Debian)
+sudo apt install redis-server
+sudo systemctl start redis
+```
+
+### Lỗi 404 trên /dashboard/*
+
+Đảm bảo folder `frontend/src/app/dashboard` (không phải `(dashboard)`) tồn tại.
 
 ---
 
