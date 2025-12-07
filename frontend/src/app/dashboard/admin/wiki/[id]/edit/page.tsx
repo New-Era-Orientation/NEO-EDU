@@ -49,7 +49,7 @@ export default function EditWikiPage({ params }: EditWikiPageProps) {
             } catch (error) {
                 console.error(error);
                 alert("Failed to load article");
-                router.push("/admin/wiki");
+                router.push("/dashboard/admin/wiki");
             } finally {
                 setIsLoading(false);
             }
@@ -69,7 +69,7 @@ export default function EditWikiPage({ params }: EditWikiPageProps) {
         try {
             setIsSaving(true);
             await api.updateWiki(id, formData);
-            router.push("/admin/wiki");
+            router.push("/dashboard/admin/wiki");
         } catch (error) {
             alert(error instanceof Error ? error.message : "Failed to update article");
         } finally {
@@ -89,7 +89,7 @@ export default function EditWikiPage({ params }: EditWikiPageProps) {
         return (
             <div className="text-center py-12">
                 <p className="text-muted-foreground">Article not found</p>
-                <Link href="/admin/wiki">
+                <Link href="/dashboard/admin/wiki">
                     <Button variant="outline" className="mt-4">Back to Wiki</Button>
                 </Link>
             </div>
@@ -99,7 +99,7 @@ export default function EditWikiPage({ params }: EditWikiPageProps) {
     return (
         <div className="space-y-6">
             <div className="flex items-center gap-4">
-                <Link href="/admin/wiki">
+                <Link href="/dashboard/admin/wiki">
                     <Button variant="ghost" size="icon">
                         <ArrowLeft className="w-4 h-4" />
                     </Button>
@@ -180,7 +180,7 @@ export default function EditWikiPage({ params }: EditWikiPageProps) {
                         </div>
 
                         <div className="flex justify-end gap-3">
-                            <Link href="/admin/wiki">
+                            <Link href="/dashboard/admin/wiki">
                                 <Button variant="outline" type="button">Cancel</Button>
                             </Link>
                             <Button type="submit" disabled={isSaving} className="gap-2">

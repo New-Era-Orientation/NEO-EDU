@@ -56,7 +56,7 @@ export default function EditExamPage({ params }: EditExamPageProps) {
             } catch (error) {
                 console.error(error);
                 alert("Failed to load exam");
-                router.push("/admin/exams");
+                router.push("/dashboard/admin/exams");
             } finally {
                 setIsLoading(false);
             }
@@ -101,7 +101,7 @@ export default function EditExamPage({ params }: EditExamPageProps) {
                 ...formData,
                 questions,
             });
-            router.push("/admin/exams");
+            router.push("/dashboard/admin/exams");
         } catch (error) {
             alert(error instanceof Error ? error.message : "Failed to update exam");
         } finally {
@@ -121,7 +121,7 @@ export default function EditExamPage({ params }: EditExamPageProps) {
         return (
             <div className="text-center py-12">
                 <p className="text-muted-foreground">Exam not found</p>
-                <Link href="/admin/exams">
+                <Link href="/dashboard/admin/exams">
                     <Button variant="outline" className="mt-4">Back to Exams</Button>
                 </Link>
             </div>
@@ -131,7 +131,7 @@ export default function EditExamPage({ params }: EditExamPageProps) {
     return (
         <div className="space-y-6">
             <div className="flex items-center gap-4">
-                <Link href="/admin/exams">
+                <Link href="/dashboard/admin/exams">
                     <Button variant="ghost" size="icon">
                         <ArrowLeft className="w-4 h-4" />
                     </Button>
@@ -327,7 +327,7 @@ export default function EditExamPage({ params }: EditExamPageProps) {
                         />
                         <Label htmlFor="publish" className="cursor-pointer">Published</Label>
                     </div>
-                    <Link href="/admin/exams">
+                    <Link href="/dashboard/admin/exams">
                         <Button variant="outline" type="button">Cancel</Button>
                     </Link>
                     <Button type="submit" disabled={isSaving} className="gap-2">

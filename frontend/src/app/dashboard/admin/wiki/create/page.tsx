@@ -55,7 +55,7 @@ export default function CreateWikiPage() {
         try {
             setIsLoading(true);
             await api.createWiki(formData);
-            router.push("/admin/wiki");
+            router.push("/dashboard/admin/wiki");
         } catch (error) {
             alert(error instanceof Error ? error.message : "Failed to create article");
         } finally {
@@ -66,7 +66,7 @@ export default function CreateWikiPage() {
     return (
         <div className="space-y-6">
             <div className="flex items-center gap-4">
-                <Link href="/admin/wiki">
+                <Link href="/dashboard/admin/wiki">
                     <Button variant="ghost" size="icon">
                         <ArrowLeft className="w-4 h-4" />
                     </Button>
@@ -147,7 +147,7 @@ export default function CreateWikiPage() {
                         </div>
 
                         <div className="flex justify-end gap-3">
-                            <Link href="/admin/wiki">
+                            <Link href="/dashboard/admin/wiki">
                                 <Button variant="outline" type="button">Cancel</Button>
                             </Link>
                             <Button type="submit" disabled={isLoading} className="gap-2">

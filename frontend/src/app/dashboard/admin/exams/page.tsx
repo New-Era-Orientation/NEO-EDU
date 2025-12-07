@@ -92,7 +92,7 @@ export default function AdminExamsPage() {
                         Create and manage exams with auto-grading
                     </p>
                 </div>
-                <Link href="/admin/exams/create">
+                <Link href="/dashboard/admin/exams/create">
                     <Button className="gap-2">
                         <Plus className="w-4 h-4" /> New Exam
                     </Button>
@@ -184,7 +184,7 @@ export default function AdminExamsPage() {
                                                     >
                                                         {exam.is_published ? <Eye className="w-4 h-4 text-green-600" /> : <EyeOff className="w-4 h-4 text-muted-foreground" />}
                                                     </Button>
-                                                    <Link href={`/admin/exams/${exam.id}/edit`}>
+                                                    <Link href={`/dashboard/admin/exams/${exam.id}/edit`}>
                                                         <Button variant="ghost" size="icon">
                                                             <Edit className="w-4 h-4" />
                                                         </Button>

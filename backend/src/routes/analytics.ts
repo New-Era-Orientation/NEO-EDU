@@ -170,7 +170,7 @@ analyticsRouter.get(
                 "analytics:courses:top",
                 async () => {
                     const result = await query(`
-                        SELECT c.id, c.title, c.enrolled_count, c.average_rating
+                        SELECT c.id, c.title, c.enrolled_count, c.rating
                         FROM courses c
                         ORDER BY c.enrolled_count DESC
                         LIMIT 10

@@ -93,7 +93,7 @@ export default function AdminWikiPage() {
                         Manage knowledge base articles
                     </p>
                 </div>
-                <Link href="/admin/wiki/create">
+                <Link href="/dashboard/admin/wiki/create">
                     <Button className="gap-2">
                         <Plus className="w-4 h-4" /> New Article
                     </Button>
@@ -178,7 +178,7 @@ export default function AdminWikiPage() {
                                                     >
                                                         {wiki.is_published ? <Eye className="w-4 h-4 text-green-600" /> : <EyeOff className="w-4 h-4 text-muted-foreground" />}
                                                     </Button>
-                                                    <Link href={`/admin/wiki/${wiki.id}/edit`}>
+                                                    <Link href={`/dashboard/admin/wiki/${wiki.id}/edit`}>
                                                         <Button variant="ghost" size="icon">
                                                             <Edit className="w-4 h-4" />
                                                         </Button>

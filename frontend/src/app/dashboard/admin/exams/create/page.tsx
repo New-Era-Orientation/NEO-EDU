@@ -71,7 +71,7 @@ export default function CreateExamPage() {
                 ...formData,
                 questions,
             });
-            router.push("/admin/exams");
+            router.push("/dashboard/admin/exams");
         } catch (error) {
             alert(error instanceof Error ? error.message : "Failed to create exam");
         } finally {
@@ -82,7 +82,7 @@ export default function CreateExamPage() {
     return (
         <div className="space-y-6">
             <div className="flex items-center gap-4">
-                <Link href="/admin/exams">
+                <Link href="/dashboard/admin/exams">
                     <Button variant="ghost" size="icon">
                         <ArrowLeft className="w-4 h-4" />
                     </Button>
@@ -278,7 +278,7 @@ export default function CreateExamPage() {
                         />
                         <Label htmlFor="publish" className="cursor-pointer">Publish immediately</Label>
                     </div>
-                    <Link href="/admin/exams">
+                    <Link href="/dashboard/admin/exams">
                         <Button variant="outline" type="button">Cancel</Button>
                     </Link>
                     <Button type="submit" disabled={isLoading} className="gap-2">
