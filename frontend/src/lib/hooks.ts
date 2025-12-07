@@ -126,13 +126,23 @@ export function useAuth() {
 }
 
 // ============================================
-// Preferences Sync Helper
+// Preferences Sync Helper (only for authenticated users)
 // ============================================
 async function loadPreferencesFromServer() {
     try {
+        // Check if user is authenticated before loading preferences
+        const storedAuth = localStorage.getItem("neo-edu-auth");
+        if (!storedAuth) {
+            return; // Guest user, skip loading preferences
+        }
+
+        const parsed = JSON.parse(storedAuth);
+        if (!parsed?.state?.token) {
+            return; // No token, skip loading preferences
+        }
+
         // Dynamically import to avoid circular dependencies
         const { useUIStore } = await import("@/stores");
-        const { useI18n } = await import("@/lib/i18n");
 
         // Load UI preferences (theme, notifications)
         useUIStore.getState().loadFromServer();
@@ -140,15 +150,12 @@ async function loadPreferencesFromServer() {
         // Load language preference
         const { preferences } = await api.getPreferences();
         if (preferences.language) {
-            const i18nContext = document.querySelector('[data-i18n-context]');
-            if (i18nContext) {
-                // This will be handled by the I18n provider's loadFromServer
-            }
             // Store in localStorage for I18n provider to pick up
             localStorage.setItem("neo-edu-locale", preferences.language);
         }
     } catch (error) {
-        console.error("Failed to load preferences from server:", error);
+        // Silently ignore for guests or expired sessions
+        console.debug("Preferences not loaded (guest or expired session)");
     }
 }
 

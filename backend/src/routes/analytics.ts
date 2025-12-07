@@ -53,7 +53,7 @@ analyticsRouter.get(
                             UNION
                             SELECT user_id FROM exam_submissions WHERE submitted_at > NOW() - INTERVAL '7 days'
                             UNION
-                            SELECT user_id FROM enrollments WHERE created_at > NOW() - INTERVAL '7 days'
+                            SELECT user_id FROM enrollments WHERE enrolled_at > NOW() - INTERVAL '7 days'
                         ) active
                     `);
 
@@ -136,10 +136,10 @@ analyticsRouter.get(
                 "analytics:enrollments:trend",
                 async () => {
                     const result = await query(`
-                        SELECT DATE(created_at) as date, COUNT(*) as count
+                        SELECT DATE(enrolled_at) as date, COUNT(*) as count
                         FROM enrollments
-                        WHERE created_at > NOW() - INTERVAL '30 days'
-                        GROUP BY DATE(created_at)
+                        WHERE enrolled_at > NOW() - INTERVAL '30 days'
+                        GROUP BY DATE(enrolled_at)
                         ORDER BY date
                     `);
                     return (result.rows as Array<{ date: string; count: string }>).map((row) => ({
@@ -242,11 +242,11 @@ analyticsRouter.get(
         try {
             const activities = await query(`
                 (
-                    SELECT 'enrollment' as type, u.name as user_name, c.title as target, e.created_at
+                    SELECT 'enrollment' as type, u.name as user_name, c.title as target, e.enrolled_at as created_at
                     FROM enrollments e
                     JOIN users u ON e.user_id = u.id
                     JOIN courses c ON e.course_id = c.id
-                    ORDER BY e.created_at DESC
+                    ORDER BY e.enrolled_at DESC
                     LIMIT 5
                 )
                 UNION ALL
