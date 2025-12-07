@@ -59,9 +59,9 @@ fi
 # ============================================
 echo -e "\n${YELLOW}[2/6] Setting up PostgreSQL database...${NC}"
 
-DB_NAME="neoedu"
-DB_USER="neoedu_user"
-DB_PASS="neoedu_pass_123"
+DB_NAME="neoedu_db"
+DB_USER="neoedu"
+DB_PASS="neoedu_secure_password_change_me"
 
 # Check if database exists
 if sudo -u postgres psql -lqt | cut -d \| -f 1 | grep -qw $DB_NAME; then

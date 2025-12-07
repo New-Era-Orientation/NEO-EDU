@@ -122,6 +122,16 @@ cd frontend && npm run dev
 
 > ⚠️ **Bắt buộc đổi mật khẩu sau khi đăng nhập lần đầu!**
 
+### Database mặc định
+
+| Field | Value |
+|-------|-------|
+| Database | `neoedu_db` |
+| User | `neoedu` |
+| Password | `neoedu_secure_password_change_me` |
+
+> 💡 Nếu setup thủ công, bạn có thể dùng bất kỳ credentials nào và cập nhật trong `.env`
+
 ---
 
 ## 💻 CLI Commands
@@ -130,32 +140,19 @@ Backend CLI cho phép quản lý qua command line:
 
 ```bash
 cd backend
-npm run cli <command> [options]
+npm run cli <command> [args]
 ```
 
-### Quản lý Admin
+### Các lệnh có sẵn
 
 | Lệnh | Mô tả |
 |------|-------|
 | `create-admin <email> <name> [password]` | Tạo admin mới |
-| `list-admins` | Liệt kê tất cả admin |
-| `delete-admin <email>` | Xóa admin |
-
-### Quản lý User
-
-| Lệnh | Mô tả |
-|------|-------|
+| `list-users [role]` | Liệt kê users (optional: filter by role) |
+| `set-role <email> <role>` | Đổi role (admin/instructor/student) |
 | `reset-password <email> [new-password]` | Reset mật khẩu user |
-| `change-role <email> <role>` | Đổi role (student/instructor/admin) |
-| `list-users` | Liệt kê users |
-
-### Database
-
-| Lệnh | Mô tả |
-|------|-------|
-| `db:migrate` | Chạy migrations |
-| `db:seed` | Seed dữ liệu mẫu |
-| `db:reset` | Reset database |
+| `delete-user <email>` | Xóa user |
+| `help` | Hiển thị trợ giúp |
 
 ### Ví dụ
 
@@ -163,14 +160,20 @@ npm run cli <command> [options]
 # Tạo admin mới
 npm run cli create-admin teacher@school.edu "Nguyen Van A" MyPassword123
 
+# Liệt kê tất cả admin
+npm run cli list-users admin
+
+# Liệt kê tất cả users
+npm run cli list-users
+
 # Reset mật khẩu
 npm run cli reset-password user@email.com NewPassword123
 
 # Đổi role thành instructor
-npm run cli change-role user@email.com instructor
+npm run cli set-role user@email.com instructor
 
-# Xem danh sách admin
-npm run cli list-admins
+# Xóa user
+npm run cli delete-user user@email.com
 ```
 
 ---
