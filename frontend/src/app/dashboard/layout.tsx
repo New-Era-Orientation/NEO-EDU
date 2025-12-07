@@ -1,11 +1,32 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Sidebar, Navbar } from "@/components/dashboard";
 import { useAuthStore, useUIStore, useOfflineStore } from "@/stores";
 import { LoadingPage } from "@/components/ui";
 import { cn } from "@/lib/utils";
+
+// Routes that guests can access without authentication
+const PUBLIC_ROUTES = [
+    "/dashboard",
+    "/dashboard/courses",
+    "/dashboard/wiki",
+    "/dashboard/exams",
+];
+
+// Check if current path is public (including dynamic routes like /dashboard/courses/[id])
+function isPublicRoute(pathname: string): boolean {
+    // Exact matches
+    if (PUBLIC_ROUTES.includes(pathname)) return true;
+
+    // Public dynamic routes
+    if (pathname.startsWith("/dashboard/courses/") && !pathname.includes("/lessons/")) return true;
+    if (pathname.startsWith("/dashboard/wiki/")) return true;
+    if (pathname.startsWith("/dashboard/exams/") && !pathname.includes("/take") && !pathname.includes("/result")) return true;
+
+    return false;
+}
 
 export default function DashboardLayout({
     children,
@@ -13,9 +34,12 @@ export default function DashboardLayout({
     children: React.ReactNode;
 }) {
     const router = useRouter();
+    const pathname = usePathname();
     const { isAuthenticated, isLoading, token, setLoading } = useAuthStore();
     const { sidebarCollapsed } = useUIStore();
     const { setOnline } = useOfflineStore();
+
+    const isPublic = isPublicRoute(pathname);
 
     // Check authentication
     useEffect(() => {
@@ -33,12 +57,18 @@ export default function DashboardLayout({
             }
         }
 
+        // Allow public routes without auth
+        if (isPublic) {
+            setLoading(false);
+            return;
+        }
+
         if (!isLoading && !isAuthenticated && !token) {
             router.push("/login");
         } else {
             setLoading(false);
         }
-    }, [isAuthenticated, isLoading, token, router, setLoading]);
+    }, [isAuthenticated, isLoading, token, router, setLoading, isPublic]);
 
     // Online/Offline detection
     useEffect(() => {

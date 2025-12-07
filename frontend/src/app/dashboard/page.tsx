@@ -13,12 +13,14 @@ import {
     Search
 } from "lucide-react";
 import { Card, CardContent, Button, Badge, Input, LoadingPage } from "@/components/ui";
+import { GuestSignupPrompt, useIsGuest } from "@/components/dashboard";
 import { useAuthStore } from "@/stores";
 import { useCourses, useWikis, useExams } from "@/lib/hooks";
 import type { Wiki, Exam } from "@/lib/api";
 
 export default function DashboardPage() {
     const { user } = useAuthStore();
+    const isGuest = useIsGuest();
     const { data: coursesData, isLoading: coursesLoading } = useCourses({ limit: 6 });
     const { data: wikisData, isLoading: wikisLoading } = useWikis({ limit: 4 });
     const { data: examsData, isLoading: examsLoading } = useExams({ limit: 4 });
@@ -292,26 +294,52 @@ export default function DashboardPage() {
                 </section>
             </div>
 
-            {/* CTA Section */}
-            <section className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-2xl p-6 md:p-8 text-center">
-                <h2 className="text-xl md:text-2xl font-bold mb-2">Bắt đầu học ngay hôm nay!</h2>
-                <p className="text-muted-foreground mb-4 text-sm md:text-base">
-                    Đăng ký miễn phí và truy cập kho tài liệu học tập phong phú
-                </p>
-                <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                    <Link href="/courses">
-                        <Button size="lg" className="w-full sm:w-auto">
-                            Khám phá khóa học
-                            <ArrowRight className="w-4 h-4 ml-2" />
-                        </Button>
-                    </Link>
-                    <Link href="/exams">
-                        <Button variant="outline" size="lg" className="w-full sm:w-auto">
-                            Làm bài thi thử
-                        </Button>
-                    </Link>
-                </div>
-            </section>
+            {/* CTA Section - Show different content for guest */}
+            {isGuest ? (
+                <section className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-2xl p-6 md:p-8 text-center">
+                    <h2 className="text-xl md:text-2xl font-bold mb-2">Bắt đầu học ngay hôm nay!</h2>
+                    <p className="text-muted-foreground mb-4 text-sm md:text-base">
+                        Đăng ký miễn phí để lưu tiến độ và truy cập nhiều tính năng hơn
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                        <Link href="/signup">
+                            <Button size="lg" className="w-full sm:w-auto">
+                                Tạo tài khoản miễn phí
+                                <ArrowRight className="w-4 h-4 ml-2" />
+                            </Button>
+                        </Link>
+                        <Link href="/login">
+                            <Button variant="outline" size="lg" className="w-full sm:w-auto">
+                                Đăng nhập
+                            </Button>
+                        </Link>
+                    </div>
+                </section>
+            ) : (
+                <section className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-2xl p-6 md:p-8 text-center">
+                    <h2 className="text-xl md:text-2xl font-bold mb-2">Tiếp tục học tập!</h2>
+                    <p className="text-muted-foreground mb-4 text-sm md:text-base">
+                        Khám phá khóa học mới hoặc tiếp tục tiến độ của bạn
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                        <Link href="/dashboard/courses">
+                            <Button size="lg" className="w-full sm:w-auto">
+                                Khám phá khóa học
+                                <ArrowRight className="w-4 h-4 ml-2" />
+                            </Button>
+                        </Link>
+                        <Link href="/dashboard/my-courses">
+                            <Button variant="outline" size="lg" className="w-full sm:w-auto">
+                                Khóa học của tôi
+                            </Button>
+                        </Link>
+                    </div>
+                </section>
+            )}
+
+            {/* Guest Signup Banner */}
+            {isGuest && <GuestSignupPrompt variant="banner" />}
         </div>
     );
 }
+
