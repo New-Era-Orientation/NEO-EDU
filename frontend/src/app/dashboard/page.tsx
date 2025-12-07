@@ -81,15 +81,15 @@ export default function DashboardPage() {
 
             {/* Quick Links - Mobile */}
             <div className="grid grid-cols-3 gap-3 lg:hidden">
-                <Link href="/courses" className="flex flex-col items-center gap-2 p-4 bg-card rounded-xl border hover:border-primary transition-colors">
+                <Link href="/dashboard/courses" className="flex flex-col items-center gap-2 p-4 bg-card rounded-xl border hover:border-primary transition-colors">
                     <BookOpen className="w-6 h-6 text-blue-500" />
                     <span className="text-xs font-medium">Khóa học</span>
                 </Link>
-                <Link href="/exams" className="flex flex-col items-center gap-2 p-4 bg-card rounded-xl border hover:border-primary transition-colors">
+                <Link href="/dashboard/exams" className="flex flex-col items-center gap-2 p-4 bg-card rounded-xl border hover:border-primary transition-colors">
                     <GraduationCap className="w-6 h-6 text-green-500" />
                     <span className="text-xs font-medium">Bài thi</span>
                 </Link>
-                <Link href="/wiki" className="flex flex-col items-center gap-2 p-4 bg-card rounded-xl border hover:border-primary transition-colors">
+                <Link href="/dashboard/wiki" className="flex flex-col items-center gap-2 p-4 bg-card rounded-xl border hover:border-primary transition-colors">
                     <FileText className="w-6 h-6 text-purple-500" />
                     <span className="text-xs font-medium">Wiki</span>
                 </Link>
@@ -102,7 +102,7 @@ export default function DashboardPage() {
                         <TrendingUp className="w-5 h-5 text-orange-500" />
                         <h2 className="text-lg md:text-xl font-semibold">Tài liệu phổ biến</h2>
                     </div>
-                    <Link href="/courses" className="text-sm text-primary hover:underline flex items-center gap-1">
+                    <Link href="/dashboard/courses" className="text-sm text-primary hover:underline flex items-center gap-1">
                         Xem tất cả <ArrowRight className="w-4 h-4" />
                     </Link>
                 </div>
@@ -110,7 +110,7 @@ export default function DashboardPage() {
                 {/* Desktop: 3 columns, Mobile: Horizontal scroll */}
                 <div className="hidden md:grid md:grid-cols-3 gap-4">
                     {popularCourses.map((course) => (
-                        <Link key={course.id} href={`/courses/${course.id}`}>
+                        <Link key={course.id} href={`/dashboard/courses/${course.id}`}>
                             <Card className="h-full hover:border-primary/50 transition-all hover:shadow-lg group">
                                 <CardContent className="p-4">
                                     <div className="aspect-video bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-lg mb-3 flex items-center justify-center overflow-hidden">
@@ -141,7 +141,7 @@ export default function DashboardPage() {
                 {/* Mobile: Horizontal scroll */}
                 <div className="flex md:hidden gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
                     {popularCourses.map((course) => (
-                        <Link key={course.id} href={`/courses/${course.id}`} className="min-w-[260px] flex-shrink-0">
+                        <Link key={course.id} href={`/dashboard/courses/${course.id}`} className="min-w-[260px] flex-shrink-0">
                             <Card className="h-full hover:border-primary/50 transition-all">
                                 <CardContent className="p-3">
                                     <div className="aspect-video bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-lg mb-2 flex items-center justify-center">
@@ -171,7 +171,7 @@ export default function DashboardPage() {
                         <Clock className="w-5 h-5 text-blue-500" />
                         <h2 className="text-lg md:text-xl font-semibold">Tài liệu mới nhất</h2>
                     </div>
-                    <Link href="/courses" className="text-sm text-primary hover:underline flex items-center gap-1">
+                    <Link href="/dashboard/courses" className="text-sm text-primary hover:underline flex items-center gap-1">
                         Xem tất cả <ArrowRight className="w-4 h-4" />
                     </Link>
                 </div>
@@ -179,7 +179,7 @@ export default function DashboardPage() {
                 {/* Desktop: Grid, Mobile: List */}
                 <div className="hidden md:grid md:grid-cols-3 gap-4">
                     {latestCourses.map((course) => (
-                        <Link key={course.id} href={`/courses/${course.id}`}>
+                        <Link key={course.id} href={`/dashboard/courses/${course.id}`}>
                             <Card className="h-full hover:border-primary/50 transition-all hover:shadow-lg group">
                                 <CardContent className="p-4">
                                     <div className="flex gap-4">
@@ -203,7 +203,7 @@ export default function DashboardPage() {
                 {/* Mobile: List view */}
                 <div className="md:hidden space-y-2">
                     {latestCourses.map((course) => (
-                        <Link key={course.id} href={`/courses/${course.id}`}>
+                        <Link key={course.id} href={`/dashboard/courses/${course.id}`}>
                             <Card className="hover:border-primary/50 transition-all">
                                 <CardContent className="p-3 flex gap-3">
                                     <div className="w-14 h-14 bg-gradient-to-br from-green-500/20 to-teal-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -232,13 +232,13 @@ export default function DashboardPage() {
                             <FileText className="w-5 h-5 text-purple-500" />
                             <h2 className="text-lg font-semibold">Wiki</h2>
                         </div>
-                        <Link href="/wiki" className="text-sm text-primary hover:underline flex items-center gap-1">
+                        <Link href="/dashboard/wiki" className="text-sm text-primary hover:underline flex items-center gap-1">
                             Xem tất cả <ArrowRight className="w-4 h-4" />
                         </Link>
                     </div>
                     <div className="space-y-2">
                         {wikis.length > 0 ? wikis.map((wiki) => (
-                            <Link key={wiki.id} href={`/wiki/${wiki.slug}`}>
+                            <Link key={wiki.id} href={`/dashboard/wiki/${wiki.slug}`}>
                                 <Card className="hover:border-primary/50 transition-all">
                                     <CardContent className="p-3 flex gap-3">
                                         <div className="w-10 h-10 bg-purple-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -270,7 +270,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="space-y-2">
                         {exams.length > 0 ? exams.map((exam) => (
-                            <Link key={exam.id} href={`/exams/${exam.id}`}>
+                            <Link key={exam.id} href={`/dashboard/exams/${exam.id}`}>
                                 <Card className="hover:border-primary/50 transition-all">
                                     <CardContent className="p-3 flex gap-3">
                                         <div className="w-10 h-10 bg-green-500/10 rounded-lg flex items-center justify-center flex-shrink-0">

@@ -28,7 +28,7 @@ export default function Home() {
 
             <div className="flex items-center gap-4">
               <Link
-                href="/courses"
+                href="/dashboard/courses"
                 className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 {t("courses.title")}
@@ -63,7 +63,7 @@ export default function Home() {
             {/* CTA */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in">
               <Link
-                href="/courses"
+                href="/dashboard/courses"
                 className="flex items-center gap-2 px-8 py-4 rounded-xl gradient-primary text-white font-semibold shadow-lg shadow-primary/25 hover:shadow-xl transition-all hover:-translate-y-0.5"
               >
                 {t("dashboard.browseCourses")}
