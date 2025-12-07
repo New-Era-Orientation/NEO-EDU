@@ -6,3 +6,4 @@ export { Avatar } from "./avatar";
 export { Badge } from "./badge";
 export { Progress } from "./progress";
 export { Loading, LoadingPage, LoadingSkeleton } from "./loading";
+export { Label, type LabelProps } from "./label";

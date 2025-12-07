@@ -267,6 +267,123 @@ BEFORE UPDATE ON contests
 FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 -- ============================================
+-- Wikis Table
+-- ============================================
+CREATE TABLE wikis (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    title VARCHAR(255) NOT NULL,
+    slug VARCHAR(255) NOT NULL UNIQUE,
+    content TEXT,
+    excerpt TEXT,
+    is_published BOOLEAN DEFAULT false,
+    author_id UUID NOT NULL REFERENCES users(id) ON DELETE SET NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_wikis_slug ON wikis(slug);
+CREATE INDEX idx_wikis_published ON wikis(is_published);
+CREATE INDEX idx_wikis_author ON wikis(author_id);
+
+-- Full-text search index for wikis
+CREATE INDEX idx_wikis_fts ON wikis USING GIN(
+    to_tsvector('english', title || ' ' || COALESCE(content, ''))
+);
+
+CREATE TRIGGER trigger_wikis_updated_at
+BEFORE UPDATE ON wikis
+FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+-- ============================================
+-- Exams Table
+-- ============================================
+CREATE TABLE exams (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    course_id UUID REFERENCES courses(id) ON DELETE SET NULL,
+    duration_minutes INTEGER NOT NULL DEFAULT 60,
+    passing_score INTEGER NOT NULL DEFAULT 70,
+    max_attempts INTEGER DEFAULT 1,
+    shuffle_questions BOOLEAN DEFAULT false,
+    is_published BOOLEAN DEFAULT false,
+    created_by UUID NOT NULL REFERENCES users(id),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_exams_course ON exams(course_id);
+CREATE INDEX idx_exams_published ON exams(is_published);
+CREATE INDEX idx_exams_created_by ON exams(created_by);
+
+CREATE TRIGGER trigger_exams_updated_at
+BEFORE UPDATE ON exams
+FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+-- ============================================
+-- Exam Questions Table
+-- ============================================
+CREATE TABLE exam_questions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    exam_id UUID NOT NULL REFERENCES exams(id) ON DELETE CASCADE,
+    question_text TEXT NOT NULL,
+    question_type VARCHAR(20) NOT NULL CHECK (question_type IN ('multiple-choice', 'true-false', 'short-answer')),
+    options JSONB,
+    correct_answer TEXT NOT NULL,
+    points INTEGER NOT NULL DEFAULT 1,
+    "order" INTEGER NOT NULL DEFAULT 0,
+    explanation TEXT
+);
+
+CREATE INDEX idx_exam_questions_exam ON exam_questions(exam_id);
+CREATE INDEX idx_exam_questions_order ON exam_questions(exam_id, "order");
+
+-- ============================================
+-- Exam Submissions Table
+-- ============================================
+CREATE TABLE exam_submissions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    exam_id UUID NOT NULL REFERENCES exams(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    answers JSONB NOT NULL DEFAULT '{}',
+    score INTEGER,
+    total_points INTEGER,
+    passed BOOLEAN,
+    started_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    submitted_at TIMESTAMP WITH TIME ZONE,
+    UNIQUE(exam_id, user_id)
+);
+
+CREATE INDEX idx_exam_submissions_exam ON exam_submissions(exam_id);
+CREATE INDEX idx_exam_submissions_user ON exam_submissions(user_id);
+CREATE INDEX idx_exam_submissions_score ON exam_submissions(exam_id, score DESC);
+
+-- ============================================
+-- System Settings Table
+-- Key-value store for platform configuration
+-- ============================================
+CREATE TABLE system_settings (
+    key VARCHAR(100) PRIMARY KEY,
+    value JSONB NOT NULL DEFAULT '{}',
+    description TEXT,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_by UUID REFERENCES users(id)
+);
+
+-- Default settings
+INSERT INTO system_settings (key, value, description) VALUES
+    ('email_enabled', 'false', 'Enable/disable email service'),
+    ('email_smtp_host', '""', 'SMTP server hostname'),
+    ('email_smtp_port', '587', 'SMTP server port'),
+    ('email_smtp_user', '""', 'SMTP username'),
+    ('email_smtp_pass', '""', 'SMTP password (encrypted)'),
+    ('email_from_address', '"noreply@neoedu.vn"', 'Default sender email'),
+    ('email_from_name', '"NEO EDU"', 'Default sender name'),
+    ('site_name', '"NEO EDU"', 'Platform name'),
+    ('maintenance_mode', 'false', 'Enable maintenance mode')
+ON CONFLICT DO NOTHING;
+
+-- ============================================
 -- Insert default admin user
 -- Email: admin@neoedu.vn
 -- Password: Admin@123 (MUST change after first login!)

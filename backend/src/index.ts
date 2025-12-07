@@ -13,6 +13,10 @@ import { coursesRouter } from "./routes/courses.js";
 import { lessonsRouter } from "./routes/lessons.js";
 import { usersRouter } from "./routes/users.js";
 import { contestsRouter } from "./routes/contests.js";
+import { wikiRouter } from "./routes/wiki.js";
+import { examsRouter } from "./routes/exams.js";
+import { settingsRouter } from "./routes/settings.js";
+import { analyticsRouter } from "./routes/analytics.js";
 import { errorHandler } from "./middleware/error.js";
 
 // ============================================
@@ -121,6 +125,10 @@ app.use("/courses", coursesRouter);
 app.use("/lessons", lessonsRouter);
 app.use("/users", usersRouter);
 app.use("/contests", contestsRouter);
+app.use("/wiki", wikiRouter);
+app.use("/exams", examsRouter);
+app.use("/settings", settingsRouter);
+app.use("/analytics", analyticsRouter);
 
 
 // ============================================

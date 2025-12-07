@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { api, setCSRFToken, clearCSRFToken, type Course, type Lesson, type User } from "./api";
+import { api, setCSRFToken, clearCSRFToken, type Course, type Lesson, type User, type Wiki, type Exam } from "./api";
 import { useAuthStore } from "@/stores";
 
 // ============================================
@@ -311,6 +311,34 @@ export function useEnrolledCourses() {
         queryFn: () => api.getEnrolledCourses(),
         enabled: !!token || isAuthenticated,
         staleTime: 60 * 1000, // 1 minute
+    });
+}
+
+// ============================================
+// Wiki Hooks
+// ============================================
+export function useWikis(params?: { limit?: number }) {
+    return useQuery({
+        queryKey: ["wikis", params],
+        queryFn: () => api.getWikis(),
+        staleTime: 60 * 1000,
+        select: (data) => ({
+            wikis: params?.limit ? data.wikis.slice(0, params.limit) : data.wikis
+        })
+    });
+}
+
+// ============================================
+// Exams Hooks
+// ============================================
+export function useExams(params?: { limit?: number }) {
+    return useQuery({
+        queryKey: ["exams", params],
+        queryFn: () => api.getExams(),
+        staleTime: 60 * 1000,
+        select: (data) => ({
+            exams: params?.limit ? data.exams.slice(0, params.limit) : data.exams
+        })
     });
 }
 

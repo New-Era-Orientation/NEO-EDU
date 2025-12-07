@@ -16,6 +16,8 @@ import {
     Shield,
     FileText,
     Trophy,
+    BookMarked,
+    ClipboardList,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUIStore, useAuthStore } from "@/stores";
@@ -38,10 +40,14 @@ const instructorNavItems = [
 const adminNavItems = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/dashboard/admin", label: "Admin Panel", icon: Shield },
+    { href: "/dashboard/admin/analytics", label: "Thống kê", icon: BarChart3 },
     { href: "/dashboard/admin/users", label: "Quản lý Users", icon: Users },
     { href: "/dashboard/admin/courses", label: "Quản lý Courses", icon: BookOpen },
     { href: "/dashboard/admin/lessons", label: "Quản lý Lessons", icon: FileText },
     { href: "/dashboard/admin/contests", label: "Quản lý Contests", icon: Trophy },
+    { href: "/dashboard/admin/exams", label: "Quản lý Exams", icon: ClipboardList },
+    { href: "/dashboard/admin/wiki", label: "Quản lý Wiki", icon: BookMarked },
+    { href: "/dashboard/admin/settings", label: "Cài đặt hệ thống", icon: Settings },
 ];
 
 const bottomNavItems = [

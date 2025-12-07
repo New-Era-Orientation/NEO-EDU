@@ -108,6 +108,71 @@ export interface ContestLeaderboardEntry {
     submitted_at: string;
 }
 
+export interface Wiki {
+    id: string;
+    title: string;
+    slug: string;
+    content?: string;
+    excerpt?: string;
+    is_published: boolean;
+    author_id: string;
+    author_name?: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface ExamQuestion {
+    id?: string;
+    exam_id?: string;
+    question_text: string;
+    question_type: "multiple-choice" | "true-false" | "short-answer";
+    options?: string[];
+    correct_answer: string;
+    points: number;
+    order: number;
+    explanation?: string;
+}
+
+export interface Exam {
+    id: string;
+    title: string;
+    description?: string;
+    course_id?: string;
+    course_title?: string;
+    duration_minutes: number;
+    passing_score: number;
+    max_attempts: number;
+    shuffle_questions: boolean;
+    is_published: boolean;
+    created_by: string;
+    creator_name?: string;
+    question_count?: number;
+    submission_count?: number;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface ExamSubmission {
+    id: string;
+    exam_id: string;
+    user_id: string;
+    answers: Record<string, string>;
+    score?: number;
+    total_points?: number;
+    passed?: boolean;
+    started_at: string;
+    submitted_at?: string;
+    exam_title?: string;
+    passing_score?: number;
+}
+
+export interface SystemSetting {
+    key: string;
+    value: string | number | boolean;
+    description?: string;
+    updated_at: string;
+}
+
 
 // ============================================
 // CSRF Token Management
@@ -444,6 +509,17 @@ class ApiClient {
         });
     }
 
+    async getCourseLessons(courseId: string): Promise<{ lessons: Lesson[] }> {
+        return this.request<{ lessons: Lesson[] }>(`/courses/${courseId}/lessons`);
+    }
+
+    async updateLessonProgress(lessonId: string, data: { completed: boolean; time_spent: number }): Promise<{ message: string }> {
+        return this.request<{ message: string }>(`/lessons/${lessonId}/progress`, {
+            method: "POST",
+            body: JSON.stringify(data),
+        });
+    }
+
     // ============================================
     // Users Endpoints
     // ============================================
@@ -633,6 +709,296 @@ class ApiClient {
             method: "POST",
             body: JSON.stringify({ answers }),
         });
+    }
+
+    // ============================================
+    // Wiki Endpoints
+    // ============================================
+    async getWikis(params?: {
+        search?: string;
+        page?: number;
+        limit?: number;
+    }): Promise<{ wikis: Wiki[] }> {
+        const searchParams = new URLSearchParams();
+        if (params?.search) searchParams.set("search", params.search);
+        if (params?.page) searchParams.set("page", params.page.toString());
+        if (params?.limit) searchParams.set("limit", params.limit.toString());
+
+        const query = searchParams.toString();
+        return this.request<{ wikis: Wiki[] }>(
+            `/wiki${query ? `?${query}` : ""}`
+        );
+    }
+
+    async getAdminWikis(params?: {
+        search?: string;
+        page?: number;
+        limit?: number;
+    }): Promise<{
+        wikis: Wiki[];
+        total: number;
+        page: number;
+        limit: number;
+    }> {
+        const searchParams = new URLSearchParams();
+        if (params?.search) searchParams.set("search", params.search);
+        if (params?.page) searchParams.set("page", params.page.toString());
+        if (params?.limit) searchParams.set("limit", params.limit.toString());
+
+        return this.request("/wiki/admin?" + searchParams.toString());
+    }
+
+    async getWiki(slug: string): Promise<{ wiki: Wiki }> {
+        return this.request<{ wiki: Wiki }>(`/wiki/${slug}`);
+    }
+
+    async getWikiById(id: string): Promise<{ wiki: Wiki }> {
+        return this.request<{ wiki: Wiki }>(`/wiki/admin/${id}`);
+    }
+
+    async createWiki(data: {
+        title: string;
+        slug: string;
+        content?: string;
+        excerpt?: string;
+        is_published?: boolean;
+    }): Promise<{ wiki: Wiki }> {
+        return this.request<{ wiki: Wiki }>("/wiki", {
+            method: "POST",
+            body: JSON.stringify(data),
+        });
+    }
+
+    async updateWiki(
+        id: string,
+        data: Partial<{
+            title: string;
+            slug: string;
+            content: string;
+            excerpt: string;
+            is_published: boolean;
+        }>
+    ): Promise<{ wiki: Wiki }> {
+        return this.request<{ wiki: Wiki }>(`/wiki/${id}`, {
+            method: "PUT",
+            body: JSON.stringify(data),
+        });
+    }
+
+    async deleteWiki(id: string): Promise<{ message: string }> {
+        return this.request<{ message: string }>(`/wiki/${id}`, {
+            method: "DELETE",
+        });
+    }
+
+    // ============================================
+    // Exam Endpoints
+    // ============================================
+    async getExams(params?: {
+        course_id?: string;
+        page?: number;
+        limit?: number;
+    }): Promise<{ exams: Exam[] }> {
+        const searchParams = new URLSearchParams();
+        if (params?.course_id) searchParams.set("course_id", params.course_id);
+        if (params?.page) searchParams.set("page", params.page.toString());
+        if (params?.limit) searchParams.set("limit", params.limit.toString());
+
+        const query = searchParams.toString();
+        return this.request<{ exams: Exam[] }>(
+            `/exams${query ? `?${query}` : ""}`
+        );
+    }
+
+    async getAdminExams(params?: {
+        search?: string;
+        page?: number;
+        limit?: number;
+    }): Promise<{
+        exams: Exam[];
+        total: number;
+        page: number;
+        limit: number;
+    }> {
+        const searchParams = new URLSearchParams();
+        if (params?.search) searchParams.set("search", params.search);
+        if (params?.page) searchParams.set("page", params.page.toString());
+        if (params?.limit) searchParams.set("limit", params.limit.toString());
+
+        return this.request("/exams/admin?" + searchParams.toString());
+    }
+
+    async getExam(id: string): Promise<{ exam: Exam }> {
+        return this.request<{ exam: Exam }>(`/exams/${id}`);
+    }
+
+    async getExamWithQuestions(id: string): Promise<{ exam: Exam; questions: ExamQuestion[] }> {
+        return this.request<{ exam: Exam; questions: ExamQuestion[] }>(`/exams/admin/${id}`);
+    }
+
+    async createExam(data: {
+        title: string;
+        description?: string;
+        course_id?: string | null;
+        duration_minutes?: number;
+        passing_score?: number;
+        max_attempts?: number;
+        shuffle_questions?: boolean;
+        is_published?: boolean;
+        questions?: ExamQuestion[];
+    }): Promise<{ exam: Exam }> {
+        return this.request<{ exam: Exam }>("/exams", {
+            method: "POST",
+            body: JSON.stringify(data),
+        });
+    }
+
+    async updateExam(
+        id: string,
+        data: Partial<{
+            title: string;
+            description: string;
+            course_id: string | null;
+            duration_minutes: number;
+            passing_score: number;
+            max_attempts: number;
+            shuffle_questions: boolean;
+            is_published: boolean;
+            questions: ExamQuestion[];
+        }>
+    ): Promise<{ exam: Exam }> {
+        return this.request<{ exam: Exam }>(`/exams/${id}`, {
+            method: "PUT",
+            body: JSON.stringify(data),
+        });
+    }
+
+    async deleteExam(id: string): Promise<{ message: string }> {
+        return this.request<{ message: string }>(`/exams/${id}`, {
+            method: "DELETE",
+        });
+    }
+
+    async getExamQuestions(id: string): Promise<{ exam: Exam; questions: ExamQuestion[] }> {
+        return this.request<{ exam: Exam; questions: ExamQuestion[] }>(`/exams/${id}/questions`);
+    }
+
+    async startExam(id: string): Promise<{ message: string; submission: ExamSubmission }> {
+        return this.request<{ message: string; submission: ExamSubmission }>(`/exams/${id}/start`, {
+            method: "POST",
+        });
+    }
+
+    async submitExam(id: string, answers: Record<string, string>): Promise<{
+        message: string;
+        submission: ExamSubmission;
+        score: number;
+        passed: boolean;
+        earnedPoints: number;
+        totalPoints: number;
+    }> {
+        return this.request(`/exams/${id}/submit`, {
+            method: "POST",
+            body: JSON.stringify({ answers }),
+        });
+    }
+
+    async getExamResult(id: string): Promise<{ result: ExamSubmission }> {
+        return this.request<{ result: ExamSubmission }>(`/exams/${id}/result`);
+    }
+
+    // ============================================
+    // System Settings Endpoints (Admin)
+    // ============================================
+    async getSettings(): Promise<{ settings: SystemSetting[] }> {
+        return this.request<{ settings: SystemSetting[] }>("/settings");
+    }
+
+    async getSetting(key: string): Promise<{ setting: SystemSetting }> {
+        return this.request<{ setting: SystemSetting }>(`/settings/${key}`);
+    }
+
+    async updateSetting(key: string, value: string | number | boolean): Promise<{ message: string; setting: { key: string; value: unknown } }> {
+        return this.request(`/settings/${key}`, {
+            method: "PUT",
+            body: JSON.stringify({ value }),
+        });
+    }
+
+    async updateSettings(settings: Record<string, string | number | boolean>): Promise<{ message: string; count: number }> {
+        return this.request("/settings", {
+            method: "PUT",
+            body: JSON.stringify({ settings }),
+        });
+    }
+
+    async testEmailConfig(to: string): Promise<{ message: string }> {
+        return this.request("/settings/email/test", {
+            method: "POST",
+            body: JSON.stringify({ to }),
+        });
+    }
+
+    // ============================================
+    // Analytics Endpoints (Admin)
+    // ============================================
+    async getAnalyticsDashboard(): Promise<{
+        stats: {
+            totalUsers: number;
+            totalCourses: number;
+            totalLessons: number;
+            totalExams: number;
+            totalEnrollments: number;
+            activeUsers7d: number;
+            newUsers7d: number;
+            examCompletions7d: number;
+        }
+    }> {
+        return this.request("/analytics/dashboard");
+    }
+
+    async getAnalyticsUserTrend(): Promise<{ data: Array<{ date: string; count: number }> }> {
+        return this.request("/analytics/users/trend");
+    }
+
+    async getAnalyticsEnrollmentTrend(): Promise<{ data: Array<{ date: string; count: number }> }> {
+        return this.request("/analytics/enrollments/trend");
+    }
+
+    async getAnalyticsTopCourses(): Promise<{
+        courses: Array<{
+            id: string;
+            title: string;
+            enrolled_count: number;
+            average_rating: number;
+        }>
+    }> {
+        return this.request("/analytics/courses/top");
+    }
+
+    async getAnalyticsExamPerformance(): Promise<{
+        exams: Array<{
+            id: string;
+            title: string;
+            attempts: number;
+            avg_score: string;
+            passed: number;
+            failed: number;
+            pass_rate: string;
+        }>
+    }> {
+        return this.request("/analytics/exams/performance");
+    }
+
+    async getAnalyticsActivity(): Promise<{
+        activities: Array<{
+            type: string;
+            user_name: string;
+            target: string;
+            created_at: string;
+        }>
+    }> {
+        return this.request("/analytics/activity");
     }
 
     // ============================================

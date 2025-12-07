@@ -138,16 +138,48 @@ export async function processSyncQueue() {
 
     for (const item of items) {
         try {
-            // TODO: Implement actual sync with backend
-            // await syncToServer(item);
+            // Use dynamic import to avoid circular dependency
+            const { syncService } = await import("./sync");
+
+            // Check if online before attempting sync
+            if (!syncService.isOnline()) {
+                console.log("Offline - skipping sync queue processing");
+                return;
+            }
+
+            // Process the item based on table and operation
+            await syncItemToServer(item);
             await db.syncQueue.delete(item.id!);
         } catch (error) {
-            // Increment retry count
-            await db.syncQueue.update(item.id!, {
-                retryCount: item.retryCount + 1,
-            });
+            // Increment retry count, remove after 5 retries
+            if (item.retryCount >= 5) {
+                console.error("Max retries reached, removing item:", item);
+                await db.syncQueue.delete(item.id!);
+            } else {
+                await db.syncQueue.update(item.id!, {
+                    retryCount: item.retryCount + 1,
+                });
+            }
             console.error("Sync failed for item:", item, error);
         }
+    }
+}
+
+async function syncItemToServer(item: SyncQueue): Promise<void> {
+    const { api } = await import("./api");
+    const { operation, table, data } = item;
+
+    switch (table) {
+        case "userProgress":
+            if (operation === "update" || operation === "create") {
+                await api.updateLessonProgress(data.lessonId as string, {
+                    completed: data.completed as boolean,
+                    time_spent: data.timeSpent as number,
+                });
+            }
+            break;
+        default:
+            console.warn(`Unknown sync table: ${table}`);
     }
 }
 
